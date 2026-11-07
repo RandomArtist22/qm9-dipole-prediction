@@ -1,0 +1,123 @@
+{
+  "n_sdf_blocks": 133885,
+  "n_label_rows": 133885,
+  "n_rdkit_failures": 1915,
+  "mu_failed_mean": 2.4981744647519584,
+  "mu_failed_median": 2.1936,
+  "mu_kept_mean": 2.709053743274987,
+  "mu_kept_median": 2.5056,
+  "n_kept": 131970,
+  "n_missing_labels": 0,
+  "n_features": 256,
+  "features_with_nan": {},
+  "features_with_inf": {},
+  "n_mu_exactly_zero": 45,
+  "n_mu_below_0.1": 921,
+  "n_mu_above_10": 280,
+  "mu_describe": {
+    "count": 131970.0,
+    "mean": 2.709053743274987,
+    "std": 1.5350512935514482,
+    "min": 0.0,
+    "25%": 1.5854,
+    "50%": 2.5056,
+    "75%": 3.6429,
+    "max": 29.5564
+  },
+  "mu_skew": 1.4560728158503724,
+  "n_rows_sharing_isomeric_smiles": 536,
+  "n_rows_sharing_2d_graph": 665,
+  "n_2d_graphs_with_duplicates": 326,
+  "median_mu_spread_within_same_2d_graph": 0.0006000000000001907,
+  "max_mu_spread_within_same_2d_graph": 5.239000000000001,
+  "n_acyclic": 14127,
+  "n_unique_scaffolds": 14712,
+  "heavy_atom_counts": {
+    "1": 3,
+    "2": 5,
+    "3": 9,
+    "4": 31,
+    "5": 126,
+    "6": 608,
+    "7": 3134,
+    "8": 17894,
+    "9": 108865,
+    "10": 1226,
+    "11": 63,
+    "12": 6
+  },
+  "top_mu_molecules": [
+    {
+      "mol_id": "gdb_123126",
+      "smiles": "[NH3+]CCCCCC(=O)[O-]",
+      "mu": 29.5564
+    },
+    {
+      "mol_id": "gdb_121864",
+      "smiles": "C[C@@H](CCC[NH3+])C(=O)[O-]",
+      "mu": 25.2022
+    },
+    {
+      "mol_id": "gdb_101807",
+      "smiles": "[NH3+]C[C@@H](O)CCC(=O)[O-]",
+      "mu": 22.9605
+    },
+    {
+      "mol_id": "gdb_97476",
+      "smiles": "[NH3+]CC#CC#CC(=O)[O-]",
+      "mu": 22.6486
+    },
+    {
+      "mol_id": "gdb_56343",
+      "smiles": "N/C=[NH+]/CCCC(=O)[O-]",
+      "mu": 21.9335
+    },
+    {
+      "mol_id": "gdb_97458",
+      "smiles": "N/C=[NH+]/CCCC(=O)[O-]",
+      "mu": 21.9326
+    },
+    {
+      "mol_id": "gdb_100457",
+      "smiles": "[NH3+]C[C@@H](O)C#CC(=O)[O-]",
+      "mu": 21.512
+    },
+    {
+      "mol_id": "gdb_130454",
+      "smiles": "[NH3+]CCc1cc(=O)o[nH]1",
+      "mu": 20.9824
+    },
+    {
+      "mol_id": "gdb_121600",
+      "smiles": "C[NH2+]CCC(=O)C(=O)[O-]",
+      "mu": 20.8468
+    },
+    {
+      "mol_id": "gdb_130453",
+      "smiles": "[NH-]c1nc(CC[NH3+])no1",
+      "mu": 20.3686
+    }
+  ],
+  "failed_ids_sample": [
+    "gdb_106",
+    "gdb_317",
+    "gdb_652",
+    "gdb_654",
+    "gdb_697",
+    "gdb_699",
+    "gdb_1150",
+    "gdb_1898",
+    "gdb_2003",
+    "gdb_2007",
+    "gdb_2010",
+    "gdb_2013",
+    "gdb_2018",
+    "gdb_2044",
+    "gdb_2046",
+    "gdb_2411",
+    "gdb_2412",
+    "gdb_2419",
+    "gdb_2422",
+    "gdb_2423"
+  ]
+}

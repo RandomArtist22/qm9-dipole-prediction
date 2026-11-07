@@ -1,0 +1,56 @@
+{
+  "random_s0": {
+    "n_train": 105576,
+    "n_test": 26394,
+    "mu_mean_train": 2.7101,
+    "mu_mean_test": 2.7049,
+    "test_frac_acyclic": 0.1081,
+    "graph_overlap": 0,
+    "scaffold_overlap_rows": 21157
+  },
+  "random_s1": {
+    "n_train": 105576,
+    "n_test": 26394,
+    "mu_mean_train": 2.7097,
+    "mu_mean_test": 2.7065,
+    "test_frac_acyclic": 0.105,
+    "graph_overlap": 0,
+    "scaffold_overlap_rows": 21265
+  },
+  "random_s2": {
+    "n_train": 105576,
+    "n_test": 26394,
+    "mu_mean_train": 2.7099,
+    "mu_mean_test": 2.7057,
+    "test_frac_acyclic": 0.1082,
+    "graph_overlap": 0,
+    "scaffold_overlap_rows": 21204
+  },
+  "scaffold": {
+    "n_train": 105157,
+    "n_test": 26813,
+    "mu_mean_train": 2.7056,
+    "mu_mean_test": 2.7227,
+    "test_frac_acyclic": 0.0,
+    "graph_overlap": 0,
+    "scaffold_overlap_rows": 0
+  },
+  "size_le8": {
+    "n_train": 21810,
+    "n_test": 21773,
+    "mu_mean_train": 2.5829,
+    "mu_mean_test": 2.724,
+    "test_frac_acyclic": 0.0879,
+    "graph_overlap": 0,
+    "scaffold_overlap_rows": 17172
+  },
+  "size_control": {
+    "n_train": 21810,
+    "n_test": 21773,
+    "mu_mean_train": 2.7067,
+    "mu_mean_test": 2.724,
+    "test_frac_acyclic": 0.0879,
+    "graph_overlap": 0,
+    "scaffold_overlap_rows": 16539
+  }
+}
