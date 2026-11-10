@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QM9 Dipole Prediction</title>
 <meta name="description" content="ES 335 project: predicting DFT dipole moments of small organic molecules (QM9) from structure — baselines, classical models, a geometry ablation, and scaffold / size-extrapolation tests.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2210%22 cy=%2216%22 r=%227%22 fill=%22%232f5bd3%22/%3E%3Ccircle cx=%2223%22 cy=%2216%22 r=%225%22 fill=%22%23d99a06%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.1.7/dist/smiles-drawer.min.js"></script>
@@ -38,7 +41,7 @@
 <!-- ======================================================= -->
 <section id="question">
   <h2><span class="num">1</span>Question and scope</h2>
-  <p class="sub">What exactly is predicted, from what, and when.</p>
+  <p class="lead-sub">What exactly is predicted, from what, and when.</p>
   <p><b>Question.</b> Can the magnitude of a molecule's dipole moment, μ (in Debye), as computed by density-functional
     theory (DFT, B3LYP/6-31G(2df,p)), be predicted from the molecule's structure alone, so that the DFT
     property calculation could be skipped when screening many small molecules for polarity? Three sub-questions:</p>
@@ -76,7 +79,7 @@
 <!-- ======================================================= -->
 <section id="data">
   <h2><span class="num">2</span>Data</h2>
-  <p class="sub">QM9, the standard quantum-chemistry benchmark of 133,885 small organic molecules.</p>
+  <p class="lead-sub">QM9, the standard quantum-chemistry benchmark of 133,885 small organic molecules.</p>
   <div class="two">
     <div>
       <h3>Source and access</h3>
@@ -124,7 +127,7 @@
 <!-- ======================================================= -->
 <section id="preprocessing">
   <h2><span class="num">3</span>Preprocessing and features</h2>
-  <p class="sub">What the models see, and why nothing learned touches the test set.</p>
+  <p class="lead-sub">What the models see, and why nothing learned touches the test set.</p>
   <p>Each SDF block is parsed with RDKit into one row. We read <b>only</b> <code>mol_id</code> and <code>mu</code> from the
     property table. From the structure we compute five groups of features:</p>
   <div class="tablewrap"><table>
@@ -158,7 +161,7 @@
 <!-- ======================================================= -->
 <section id="methods">
   <h2><span class="num">4</span>Baselines and methods</h2>
-  <p class="sub">Two baselines, then a range of models from the course, from linear to highly flexible.</p>
+  <p class="lead-sub">Two baselines, then a range of models from the course, from linear to highly flexible.</p>
   <div class="tablewrap"><table>
     <thead><tr><th>Model</th><th>Objective / core idea</th><th>Assumptions</th><th>Why it is here</th></tr></thead>
     <tbody>
@@ -179,7 +182,7 @@
 <!-- ======================================================= -->
 <section id="evaluation">
   <h2><span class="num">5</span>Evaluation design</h2>
-  <p class="sub">Splits were fixed before any model was trained; the test set is used once per model.</p>
+  <p class="lead-sub">Splits were fixed before any model was trained; the test set is used once per model.</p>
   <div class="two">
     <div>
       <h3>Main protocol</h3>
@@ -218,7 +221,7 @@
 <!-- ======================================================= -->
 <section id="results">
   <h2><span class="num">6</span>Results</h2>
-  <p class="sub">Main random split. Bars show seed-0 test MAE with 95% bootstrap CI. The table also gives mean ± sd over seeds.</p>
+  <p class="lead-sub">Main random split. Bars show seed-0 test MAE with 95% bootstrap CI. The table also gives mean ± sd over seeds.</p>
   <div class="controls">
     <span>Metric</span>
     <div class="seg" id="metric-seg"><button data-m="mae" class="on">MAE</button><button data-m="rmse">RMSE</button><button data-m="r2">R²</button></div>
@@ -249,7 +252,7 @@
 <!-- ======================================================= -->
 <section id="explorer">
   <h2><span class="num">7</span>Explore the predictions</h2>
-  <p class="sub">Every point is a held-out test molecule (a random sample of <span data-v="n_explorer"></span>, plus the 15 worst).
+  <p class="lead-sub">Every point is a held-out test molecule (a random sample of <span data-v="n_explorer"></span>, plus the 15 worst).
     Change the model or features, filter the molecules, and click a point to inspect it.</p>
   <div class="controls">
     <label>Model <select id="ex-model"></select></label>
@@ -274,7 +277,7 @@
 <!-- ======================================================= -->
 <section id="errors">
   <h2><span class="num">8</span>Error analysis</h2>
-  <p class="sub">Where the best model (gradient boosting, full features, seed 0) goes wrong.</p>
+  <p class="lead-sub">Where the best model (gradient boosting, full features, seed 0) goes wrong.</p>
   <div class="plot" id="plot-bins"></div>
   <p class="figcap">MAE by true-μ range. Low and very high dipoles are hardest, and the bias (mean residual, line) shows predictions are pulled toward the mean.</p>
   <div id="errors-text"></div>
@@ -288,7 +291,7 @@
 <!-- ======================================================= -->
 <section id="robustness">
   <h2><span class="num">9</span>Robustness: new scaffolds and larger molecules</h2>
-  <p class="sub">The same models, tuned inside each split's own training data.</p>
+  <p class="lead-sub">The same models, tuned inside each split's own training data.</p>
   <div class="plot" id="plot-robust" style="min-height:380px"></div>
   <div class="tablewrap"><table id="tbl-robust"></table></div>
   <div id="robust-text"></div>
@@ -325,7 +328,7 @@
 <!-- ======================================================= -->
 <section id="reproduce">
   <h2><span class="num">12</span>Reproduce</h2>
-  <p class="sub">Every number on this page comes from the scripts in the repository; full details are in its README.</p>
+  <p class="lead-sub">Every number on this page comes from the scripts in the repository; full details are in its README.</p>
 <pre><code>git clone https://github.com/RandomArtist22/qm9-dipole-prediction && cd qm9-dipole-prediction
 python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
 # data (44.8 MB, public): MoleculeNet copy of QM9

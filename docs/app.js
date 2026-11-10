@@ -35,7 +35,7 @@
   function baseLayout(extra = {}) {
     return Object.assign({
       paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
-      font: { family: "system-ui, sans-serif", size: 12, color: css("--ink") },
+      font: { family: "Inter, Arial, sans-serif", size: 12, color: css("--ink") },
       margin: { l: 60, r: 16, t: 30, b: 50 },
       xaxis: { gridcolor: css("--line"), zerolinecolor: css("--line") },
       yaxis: { gridcolor: css("--line"), zerolinecolor: css("--line") },
@@ -63,11 +63,10 @@
       mu_mean: f(q.mu_describe.mean, 2), mu_median: f(q.mu_describe["50%"], 2), mu_max: f(q.mu_describe.max, 1),
       mu_skew: f(q.mu_skew, 2), n_fail: q.n_rdkit_failures.toLocaleString(), mu_fail: f(q.mu_failed_mean, 2),
       mu_kept: f(q.mu_kept_mean, 2), dup_rows: q.n_rows_sharing_2d_graph, dup_spread: f(q.max_mu_spread_within_same_2d_graph, 1),
-      n_above10: q.n_mu_above_10, n_below01: q.n_mu_below_0.1 ?? q["n_mu_below_0.1"], n_zero: q.n_mu_exactly_zero,
+      n_above10: q.n_mu_above_10, n_below01: q["n_mu_below_0.1"], n_zero: q.n_mu_exactly_zero,
       n_test: S.splits.random_s0.n_test.toLocaleString(), n_scaf_test: S.splits.scaffold.n_test.toLocaleString(),
       n_explorer: EX ? (EX.molecules.length - 15).toLocaleString() : "4,000",
     };
-    V.n_below01 = q["n_mu_below_0.1"];
     $$("[data-v]").forEach((el) => { if (V[el.dataset.v] !== undefined) el.textContent = V[el.dataset.v]; });
   }
 
@@ -84,7 +83,8 @@
     const key = { mae: "mae_s0", rmse: "rmse_s0", r2: "r2_s0" }[metric];
     const models = ["mean", "linreg_comp", "ridge", "lasso", "knn", "tree", "svr", "mlp", "rf", "hgb"].filter((m) => S.model_table.some((r) => r.model === m));
     const order = models.slice().sort((a, b) => {
-      const ra = row(a, "full") || row(a, "composition"), rb = row(b, "full") || row(b, "composition");
+      const pick = (m) => row(m, "full") || row(m, "2d") || row(m, "composition");
+      const ra = pick(a), rb = pick(b);
       return metric === "r2" ? ra[key] - rb[key] : rb[key] - ra[key];
     });
     const lab = order.map((m) => ML()[m]);
@@ -286,7 +286,7 @@
       <div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Model</th><th class="n">pred</th><th class="n">error</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     try {
       const drawer = new SmilesDrawer.SvgDrawer({ width: 300, height: 190, bondThickness: 1.2 });
-      SmilesDrawer.parse(m.s, (tree) => drawer.draw(tree, "mol-svg", "light", false), () => {});
+      SmilesDrawer.parse(m.s, (tree) => drawer.draw(tree, "mol-svg", "light", null), () => {});
     } catch (e) { $("#mol-svg").outerHTML = '<p class="muted">(structure drawing unavailable)</p>'; }
   }
 

@@ -278,7 +278,8 @@ def figures(t, tests, rob, err, p, meta, lc, gi):
     fig, ax = plt.subplots(figsize=(8, 3.5))
     w = 0.8 / len(r)
     for i, (_, row) in enumerate(r.iterrows()):
-        ax.bar(np.arange(len(cols)) + i * w - 0.4 + w / 2, [row[c] for c in cols], w, label=row.model_label)
+        vals = [np.nan if row[c] is None or pd.isna(row[c]) else row[c] for c in cols]
+        ax.bar(np.arange(len(cols)) + i * w - 0.4 + w / 2, vals, w, label=row.model_label)
     ax.set_xticks(range(len(cols)), names); ax.set_ylabel("test MAE (D)"); ax.legend(frameon=False, fontsize=7, ncol=2)
     fig.tight_layout(); fig.savefig(FIGURES / "robustness.png"); plt.close(fig)
 
