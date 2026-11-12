@@ -211,8 +211,8 @@
       <tr><td><b>Scaffold</b></td><td>whole Bemis–Murcko ring scaffolds held out (<span data-v="n_scaf_test"></span> test molecules, all with rings)</td>
         <td>Does it generalise to <i>ring systems never seen</i>? In the random split, 80% of test molecules have a scaffold that also appears in training.</td>
         <td>Random split scored on ring-containing test molecules only</td></tr>
-      <tr><td><b>Size</b></td><td>train on ≤ 8 heavy atoms (21,810) → test on 9-heavy-atom molecules (21,773)</td>
-        <td>Can it <i>extrapolate</i> to larger molecules?</td><td>Same test pool, trained on a <i>random</i> 21,810 molecules (size-matched control)</td></tr>
+      <tr><td><b>Size</b></td><td>train on ≤ 8 heavy atoms (22,035) → test on 9-heavy-atom molecules (21,987)</td>
+        <td>Can it <i>extrapolate</i> to larger molecules?</td><td>Same test pool, trained on a <i>random</i> 22,035 molecules (size-matched control)</td></tr>
     </tbody></table></div>
   <div class="callout">Why the controls matter: the scaffold test set has no acyclic molecules and the size split trains on
     5× less data. Without the matched controls, those differences would be confused with the effect we want to measure.</div>

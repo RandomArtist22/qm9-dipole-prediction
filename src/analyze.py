@@ -274,7 +274,7 @@ def figures(t, tests, rob, err, p, meta, lc, gi):
     r = pd.DataFrame(rob)
     r = r[r.featureset.isin(["full", "composition"])]
     cols = ["random_all", "random_ring_only", "scaffold", "size_control", "size_le8"]
-    names = ["random\n(all)", "random\n(ring-only)", "scaffold", "size control\n(random 21.8k)", "train ≤8 → test 9"]
+    names = ["random\n(all)", "random\n(ring-only)", "scaffold", "size control\n(random, same n)", "train ≤8 → test 9"]
     fig, ax = plt.subplots(figsize=(8, 3.5))
     w = 0.8 / len(r)
     for i, (_, row) in enumerate(r.iterrows()):
@@ -301,6 +301,7 @@ def main():
                "d2_NumAromaticRings", "d2_fr_nitrile", "d2_fr_C_O", "d2_fr_Al_OH", "d2_fr_Ar_OH",
                "d2_fr_ether", "d2_fr_NH2"]].copy()
     meta["dup2d"] = meta["smiles_2d"].duplicated(keep=False)
+    meta["comp_nheavy"] = (df["comp_natoms"] - df["comp_nH"]).to_numpy()  # true heavy-atom count
 
     m, preds = collect(df, splits)
     t = model_table(m, preds)

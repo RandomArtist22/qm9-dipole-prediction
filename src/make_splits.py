@@ -48,7 +48,11 @@ def grouped_split(groups: pd.Series, frac: float, seed: int, force_train=()):
 
 
 def main():
-    df = pd.read_parquet(FEATURES_PATH, columns=["mol_id", "smiles_2d", "scaffold", "comp_nheavy", "mu"])
+    df = pd.read_parquet(FEATURES_PATH, columns=["mol_id", "smiles_2d", "scaffold", "comp_natoms", "comp_nH", "mu"])
+    # True heavy-atom count. (The feature `comp_nheavy` counts atoms left after RDKit's
+    # RemoveHs, which keeps a few stereo-relevant hydrogens, so it overcounts for 1.2% of
+    # molecules; it must not be used to define the size split.)
+    df["n_heavy"] = df["comp_natoms"] - df["comp_nH"]
     out = pd.DataFrame({"mol_id": df["mol_id"]})
 
     for s in SEEDS:
@@ -57,11 +61,11 @@ def main():
     out["scaffold"] = grouped_split(df["scaffold"], TEST_FRACTION, seed=0, force_train=[""])
 
     rng = np.random.default_rng(0)
-    nine = np.flatnonzero(df["comp_nheavy"].to_numpy() == 9)
+    nine = np.flatnonzero(df["n_heavy"].to_numpy() == 9)
     pool = rng.choice(nine, size=int(TEST_FRACTION * len(nine)), replace=False)
     in_pool = np.zeros(len(df), bool)
     in_pool[pool] = True
-    small = df["comp_nheavy"].to_numpy() <= 8
+    small = df["n_heavy"].to_numpy() <= 8
 
     size = np.full(len(df), "", dtype=object)
     size[small] = "train"

@@ -99,6 +99,10 @@ def featurize(block):
     for e in Z:
         row[f"comp_n{e}"] = elems.count(e)
     row["comp_natoms"] = len(elems)
+    # NB: atoms left after RemoveHs. RDKit keeps a few stereo-relevant H atoms, so this
+    # overcounts heavy atoms for ~1.2% of molecules. It is kept as an input feature (it was
+    # used in every reported model); the true heavy-atom count, comp_natoms - comp_nH, is
+    # used for the size split and all analyses.
     row["comp_nheavy"] = heavy.GetNumAtoms()
 
     # --- 2D descriptors (graph only) ---
@@ -186,7 +190,8 @@ def main():
         "max_mu_spread_within_same_2d_graph": float(spread.max()) if len(spread) else 0.0,
         "n_acyclic": int((ok["scaffold"] == "").sum()),
         "n_unique_scaffolds": int(ok["scaffold"].nunique()),
-        "heavy_atom_counts": {int(k): int(v) for k, v in ok["comp_nheavy"].value_counts().sort_index().items()},
+        "heavy_atom_counts": {int(k): int(v) for k, v in (ok["comp_natoms"] - ok["comp_nH"]).value_counts().sort_index().items()},
+        "n_comp_nheavy_overcounted": int(((ok["comp_natoms"] - ok["comp_nH"]) != ok["comp_nheavy"]).sum()),
         "top_mu_molecules": ok.nlargest(10, "mu")[["mol_id", "smiles", "mu"]].to_dict("records"),
         "failed_ids_sample": failed["mol_id"].head(20).tolist(),
     }

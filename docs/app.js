@@ -199,7 +199,7 @@
   function drawRobust() {
     const rr = S.robustness.filter((r) => r.featureset !== "2d" || true);
     const cols = [["random_all", "random (all)"], ["random_ring_only", "random (ring-only)"], ["scaffold", "scaffold split"],
-      ["size_control", "size control (random 21.8k)"], ["size_le8", "train ≤ 8 → test 9"]];
+      ["size_control", "size control (random, same n)"], ["size_le8", "train ≤ 8 → test 9"]];
     const sel = rr.filter((r) => ["hgb", "rf", "ridge", "linreg_comp", "mean"].includes(r.model));
     const tr = sel.map((r) => ({ type: "bar", name: `${r.model_label}${r.featureset === "composition" ? "" : r.featureset === "full" ? " · +geom" : " · 2D"}`,
       x: cols.map((c) => c[1]), y: cols.map((c) => r[c[0]]),
