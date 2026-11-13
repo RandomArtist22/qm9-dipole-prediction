@@ -229,7 +229,24 @@
   <div class="plot" id="plot-models" style="min-height:420px"></div>
   <p class="figcap">Grey = baselines; amber = structure-only features; blue = structure + geometry. Lower is better for MAE and RMSE.</p>
   <div class="tablewrap"><table id="tbl-models"></table></div>
-  <div id="results-text"></div>
+  <div id="results-text">
+    <p><b>Every learned model beats both baselines by a wide margin.</b> Predicting the mean gives MAE 1.19 D. Knowing only
+      which atoms are present (linear regression on atom counts) improves this just to 1.01 D (R² 0.23). Polarity depends on how
+      atoms are connected and arranged, not only on which atoms are present.</p>
+    <p><b>The feature set matters more than the choice of model.</b> With structure-only features the best models reach about
+      0.54 D (gradient boosting, random forest). Adding the geometry features lowers the MAE of every model: by about 23% for
+      Ridge/Lasso, 31–38% for the tree, SVR, MLP and ensembles, but only 6% for k-NN. k-NN gains little because its Euclidean distance
+      over ~250 standardised features is dominated by the ~190 2D descriptors, so the few informative geometry features are diluted.
+      With full features the three strongest models are close: gradient boosting <b>0.341 D</b> (R² 0.88), MLP 0.356 D, random forest 0.363 D.
+      The gap between feature sets (≈ 0.2 D) is ten times the gap among these three models (≈ 0.02 D).</p>
+    <p><b>Linear models underfit.</b> Ridge and Lasso stay near 0.57 D even with all features, and CV picked the
+      <i>weakest</i> penalty in each grid. With ~100k molecules and ~250 features the linear models are limited by bias, not
+      variance, so regularisation barely matters and sparsity (Lasso) brings nothing. The dipole is a non-linear function
+      (the norm of a vector sum) of the features.</p>
+    <p><b>Why is the CV error higher than the test error?</b> The tuning CV fits models on 12k molecules (4/5 of a 15k subsample);
+      the final models are refit on 105k. The learning curve below shows the error is still falling with more data, so the
+      CV scores were used only to <i>rank</i> settings, never as an estimate of final performance.</p>
+  </div>
   <h3>Ablation: what part of the geometry helps?</h3>
   <div class="two">
     <div class="plot" id="plot-ablation"></div>
@@ -280,12 +297,36 @@
   <p class="lead-sub">Where the best model (gradient boosting, full features, seed 0) goes wrong.</p>
   <div class="plot" id="plot-bins"></div>
   <p class="figcap">MAE by true-μ range. Low and very high dipoles are hardest, and the bias (mean residual, line) shows predictions are pulled toward the mean.</p>
-  <div id="errors-text"></div>
+  <div id="errors-text">
+    <p><b>Typical error is small, but the tail is heavy.</b> The median absolute error is 0.21 D; 78% of test molecules are
+      within 0.5 D and 94% within 1 D. RMSE (0.53 D) is well above MAE (0.34 D) because a few molecules are missed by several Debye.</p>
+    <p><b>Predictions are pulled toward the mean.</b> The residual (prediction − truth) is negatively correlated with the true
+      dipole (r = −0.40). Molecules below 1 D are over-predicted by +0.2 to +0.3 D on average, and molecules above 7 D are under-predicted by
+      1.1 D. Two reasons: squared-error tree ensembles average over leaves, which shrinks rare extremes toward the dense middle of
+      the distribution; and a near-zero dipole needs bond dipoles to <i>cancel exactly</i>, so any small error in their estimated
+      directions or sizes adds up to a non-zero prediction. (The magnitude |μ| can never be negative, so errors near zero are one-sided.)</p>
+    <p><b>Geometry helps in every range</b>, most of all where the answer depends on how polar groups are arranged in space:
+      MAE falls from 0.73 to 0.39 D for 0.5–1 D molecules (partial cancellation) and from 1.10 to 0.56 D for 5–7 D molecules
+      (aligned polar groups). The 2D graph says <i>which</i> polar groups exist; only the 3D coordinates say whether their
+      dipoles add up or cancel.</p>
+  </div>
   <h3>By chemical group</h3>
   <div class="tablewrap"><table id="tbl-groups"></table></div>
   <h3>The 15 worst predictions</h3>
   <div class="tablewrap"><table id="tbl-worst"></table></div>
-  <div id="worst-text"></div>
+  <div id="worst-text">
+    <p><b>The worst errors are charge-separated molecules.</b> 13 of these 15 molecules carry formal charges
+      (<code>[NH3+]</code>, <code>[NH2+]</code>, <code>[O-]</code>, <code>[CH+]</code>): zwitterions or strongly charge-separated
+      resonance forms. Their dipole is dominated by two full opposite charges a few Ångström apart. One elementary charge
+      separated by 1 Å is already 4.8 D, so a small error in where the charge sits becomes an error of several Debye. Gasteiger charges
+      were designed for neutral molecules and capture this poorly, and charged molecules are rare in training (the
+      “Charged / zwitterion” row above). The two uncharged ones (<code>gdb_129996</code>, <code>gdb_129994</code>) are fused
+      bicyclic molecules with several ring nitrogens, a rare motif among 9-atom molecules. Outside this table, the group with the
+      highest MAE is molecules whose 2D graph occurs more than once (0.72 D): the 2D-only model cannot tell them apart, and
+      even with geometry they remain hard.</p>
+    <p class="muted" style="font-size:14px">This points to the most promising change: features that describe charge separation
+      directly (e.g. the distance between formally charged atoms), or charges from a better (but still cheap) charge model.</p>
+  </div>
 </section>
 
 <!-- ======================================================= -->
