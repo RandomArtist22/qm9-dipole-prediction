@@ -335,7 +335,25 @@
   <p class="lead-sub">The same models, tuned inside each split's own training data.</p>
   <div class="plot" id="plot-robust" style="min-height:380px"></div>
   <div class="tablewrap"><table id="tbl-robust"></table></div>
-  <div id="robust-text"></div>
+  <div id="robust-text">
+    <h3>New ring scaffolds: a moderate, consistent penalty for flexible models</h3>
+    <p>Compared with its fair control (the random split scored on ring-containing molecules only), holding out whole ring
+      scaffolds raises the MAE of gradient boosting from 0.334 to <b>0.393 D (+18%)</b>, of the random forest by 17% and of the tree by 14%,
+      but of Ridge by only 3%. The flexible models partly rely on patterns specific to scaffolds they have seen; the linear model has
+      little such capacity to lose. The ranking does not change: on unseen scaffolds gradient boosting with geometry (0.39 D)
+      is still far better than Ridge (0.57 D) or any structure-only model (≥ 0.60 D). So the random-split numbers are
+      somewhat optimistic for genuinely new chemistry, by about a sixth, but the conclusions hold.</p>
+    <h3>Larger molecules: trees extrapolate gracefully, a linear model fails</h3>
+    <p>Trained only on molecules with ≤ 8 heavy atoms and tested on 9-heavy-atom molecules, gradient boosting reaches
+      0.450 D versus 0.420 D for a model trained on the same number of random molecules: a <b>7% penalty</b> for never having seen a
+      molecule of that size (random forest +4%, tree +6%, structure-only models +1–2%). Ridge with the full features, however, jumps from
+      0.58 to <b>1.92 D</b>: it over-predicts every 9-atom molecule by +1.8 D on average. The cause is one feature. The 9th-largest
+      Coulomb-matrix eigenvalue comes from a hydrogen in any molecule with ≤ 8 heavy atoms, but from a heavy atom in a 9-atom molecule,
+      so 99.8% of test molecules have a value beyond anything seen in training. A linear model multiplies that out-of-range value by its
+      coefficient and shifts all predictions. A tree only asks “is it above the last threshold?”, so its prediction stays within
+      the range of the training targets. This is the interpolation-versus-extrapolation lesson in practice: a feature that is fine
+      within the training range can be dangerous outside it.</p>
+  </div>
 </section>
 
 <!-- ======================================================= -->
@@ -349,8 +367,12 @@
       so the structure + geometry numbers are an upper bound for that use.</li>
     <li><b>One conformer per molecule.</b> μ depends on conformation, and QM9 has one. Molecules sharing a 2D graph differ by up to
       <span data-v="dup_spread"></span> D, which no 2D model can resolve.</li>
-    <li><b>Narrow chemical space.</b> Only H, C, N, O, F and ≤ 9 heavy atoms. The size test shows error grows when extrapolating even one atom, so
-      drug-sized molecules are out of scope.</li>
+    <li><b>Narrow chemical space.</b> Only H, C, N, O, F and ≤ 9 heavy atoms. We could test extrapolation by just one heavy atom
+      (+7% error for the best model, and a failure for the linear model); behaviour on drug-sized molecules is untested and out of scope.
+      New ring scaffolds cost the flexible models about 15–18%.</li>
+    <li><b>A feature quirk.</b> The <code>comp_nheavy</code> input counts atoms left after RDKit's <code>RemoveHs</code>, which keeps a few
+      stereo-relevant hydrogens; it overcounts for 1.2% of molecules. It is a valid but slightly odd input; the size split and every
+      analysis use the true heavy-atom count.</li>
     <li><b>Data cleaning.</b> 1.4% of molecules were dropped as unparseable (slightly lower μ on average), and QM9's official
       list of ~3k geometry-inconsistent molecules was not applied.</li>
     <li><b>Compute-driven shortcuts.</b> Tuning used a 15k subsample with small grids; SVR was fit on 20k molecules only; k-NN, SVR,
