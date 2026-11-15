@@ -259,7 +259,9 @@
       (Coulomb eigenvalues and shape) to the 2D features helps only a little: gradient boosting goes from 0.542 to 0.513 D, Ridge from 0.748 to 0.743 D.
       Adding just the two dipole estimates instead, |Σ q<sub>i</sub>r<sub>i</sub>| from Gasteiger charges and the electronegativity bond-dipole
       sum, brings gradient boosting to <b>0.345 D</b>, almost exactly the 0.341 D of the full set. Ridge moves from 0.748 to 0.576 D.
-      The permutation test agrees: shuffling the dipole-estimate group hurts the full model far more than shuffling any other group.
+      The permutation test agrees: shuffling just these <i>two</i> columns raises the full model's MAE by 0.66 D, almost as much as
+      shuffling all 208 2D descriptors together (0.83 D), while the 35 Coulomb/shape columns cost only 0.07 D. The 2D descriptors still
+      matter: they say which polar groups are present, and the dipole estimates say how those groups add up in 3D.
       The point is <i>how</i> the 3D information is encoded. Generic invariant descriptors throw away directions; a dipole is a
       vector sum, so a feature built the same way, from charges and positions, gives the model most of the answer, and the model
       learns to correct its errors.</p>
@@ -269,7 +271,13 @@
   <h3>Learning curve</h3>
   <div class="plot" id="plot-lc"></div>
   <p class="figcap">Gradient boosting trained on growing subsets of the training split (hyper-parameters fixed from CV). Solid = test, dashed = training error.</p>
-  <div id="lc-text"></div>
+  <div id="lc-text">
+    <p><b>Good features are worth far more data.</b> With geometry features, gradient boosting trained on only 1,000 molecules
+      (MAE 0.59 D) is already about as accurate as the structure-only model trained on 50,000 (0.57 D). Both curves are still falling at the
+      full training size (full features: 0.368 D at 50k → 0.342 D at 105k), so more data would still help a little. The gap between the
+      training error (dashed) and the test error shows the remaining variance. Training error is not monotone because early stopping picks a
+      different number of trees at each size.</p>
+  </div>
   <h3>Is the difference real? Paired bootstrap on the same test molecules</h3>
   <div class="tablewrap"><table id="tbl-tests"></table></div>
   <p class="muted" style="font-size:14px">The bootstrap shows whether a gap is larger than test-set sampling noise for <i>this</i> split
