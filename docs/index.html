@@ -254,7 +254,18 @@
   </div>
   <p class="figcap">Left: test MAE as feature groups are added (Ridge and gradient boosting, seed 0). Right: grouped permutation
     importance for the best model, i.e. how much the test MAE rises when one whole group is shuffled.</p>
-  <div id="ablation-text"></div>
+  <div id="ablation-text">
+    <p><b>Two physics-motivated features carry almost all of the geometry benefit.</b> Adding the 35 generic geometry descriptors
+      (Coulomb eigenvalues and shape) to the 2D features helps only a little: gradient boosting goes from 0.542 to 0.513 D, Ridge from 0.748 to 0.743 D.
+      Adding just the two dipole estimates instead, |Σ q<sub>i</sub>r<sub>i</sub>| from Gasteiger charges and the electronegativity bond-dipole
+      sum, brings gradient boosting to <b>0.345 D</b>, almost exactly the 0.341 D of the full set. Ridge moves from 0.748 to 0.576 D.
+      The permutation test agrees: shuffling the dipole-estimate group hurts the full model far more than shuffling any other group.
+      The point is <i>how</i> the 3D information is encoded. Generic invariant descriptors throw away directions; a dipole is a
+      vector sum, so a feature built the same way, from charges and positions, gives the model most of the answer, and the model
+      learns to correct its errors.</p>
+    <p class="muted" style="font-size:14px">This matches an earlier Kaggle-based study, which found that Coulomb-matrix eigenvalues alone
+      give a weak dipole model (MAE ≈ 0.8 D on a 20k-molecule subset) and that the representation matters more than the learner.</p>
+  </div>
   <h3>Learning curve</h3>
   <div class="plot" id="plot-lc"></div>
   <p class="figcap">Gradient boosting trained on growing subsets of the training split (hyper-parameters fixed from CV). Solid = test, dashed = training error.</p>
@@ -385,7 +396,26 @@
 <!-- ======================================================= -->
 <section id="conclusion">
   <h2><span class="num">11</span>Conclusion</h2>
-  <div id="conclusion-text"></div>
+  <div id="conclusion-text">
+    <ol>
+      <li><b>Yes, within QM9's scope, the DFT dipole can be predicted from structure.</b> Gradient boosting with structure + geometry
+        features reaches a test MAE of <b>0.34 D</b> (R² 0.88), 71% below the mean baseline and 66% below linear regression on atom counts.
+        78% of molecules are within 0.5 D. Without any 3D information, the best structure-only model reaches 0.54 D.</li>
+      <li><b>Representation matters more than the model.</b> Changing the features (2D → + geometry) improves the best models by about
+        0.2 D; changing among the three best models moves the MAE by 0.02 D. Within the geometry, two physics-motivated
+        dipole estimates (charges × positions) do almost all of the work.</li>
+      <li><b>The models generalise, with a cost.</b> Unseen ring scaffolds raise the error of the flexible models by about a sixth.
+        Molecules one heavy atom larger than any in training raise it by 7% for gradient boosting, but break a linear model whose features
+        leave their training range.</li>
+      <li><b>Known failure modes.</b> Charged / zwitterionic molecules (errors of several Debye), symmetric molecules (always over-predicted),
+        and very polar molecules (under-predicted): predictions are pulled toward the mean.</li>
+    </ol>
+    <p><b>What this does not show.</b> It does not show that these models would work for experimental dipoles, larger molecules or cheaper
+      (non-DFT) geometries. Feature importance shows what the models use to predict, not what makes molecules polar.</p>
+    <p><b>Next steps.</b> (1) Replace DFT geometries with force-field geometries to test the realistic “skip all of DFT” claim.
+      (2) Add features for charge separation (distance between formally charged atoms) to target the worst failures.
+      (3) Predict the dipole <i>vector</i> rather than its magnitude, which would also avoid the one-sided errors near zero.</p>
+  </div>
 </section>
 
 <!-- ======================================================= -->
