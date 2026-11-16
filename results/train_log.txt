@@ -1,0 +1,122 @@
+random_s0__2d__lasso                          MAE=0.7515 RMSE=1.0437 R2=0.5307 cvMAE=0.7519160059364893 params={'m__alpha': 0.0001} (41s tune, 113s fit)
+random_s0__2d__knn                            MAE=0.6131 RMSE=0.9020 R2=0.6494 cvMAE=0.690680034530579 params={'m__n_neighbors': 10} (5s tune, 9s fit)
+random_s0__2d__rf                             MAE=0.5489 RMSE=0.8162 R2=0.7129 cvMAE=0.6475554018144444 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (57s tune, 38s fit)
+random_s0__2d__svr                            MAE=0.6227 RMSE=0.9199 R2=0.6354 cvMAE=0.6452453758068659 params={'m__C': 10, 'm__gamma': 0.002} (164s tune, 114s fit)
+random_s0__2d__mlp                            MAE=0.5755 RMSE=0.8278 R2=0.7047 cvMAE=0.6918532455566452 params={'m__alpha': 0.01} (14s tune, 134s fit)
+random_s0__full__lasso                        MAE=0.5754 RMSE=0.8482 R2=0.6900 cvMAE=0.5728271380882383 params={'m__alpha': 0.0001} (45s tune, 166s fit)
+random_s0__full__knn                          MAE=0.5780 RMSE=0.8590 R2=0.6821 cvMAE=0.6722201623087953 params={'m__n_neighbors': 10} (4s tune, 13s fit)
+random_s0__full__rf                           MAE=0.3632 RMSE=0.5954 R2=0.8473 cvMAE=0.46248255736666666 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (77s tune, 52s fit)
+random_s0__full__svr                          MAE=0.4282 RMSE=0.6876 R2=0.7963 cvMAE=0.44976689761152666 params={'m__C': 10, 'm__gamma': 0.002} (175s tune, 146s fit)
+random_s0__full__mlp                          MAE=0.3559 RMSE=0.5523 R2=0.8685 cvMAE=0.49435476487862207 params={'m__alpha': 0.01} (19s tune, 199s fit)
+scaffold__composition__mean                   MAE=1.1686 RMSE=1.4831 R2=-0.0001 cvMAE=None params={} (0s tune, 0s fit)
+scaffold__composition__linreg_comp            MAE=1.0084 RMSE=1.3256 R2=0.2009 cvMAE=None params={} (0s tune, 0s fit)
+scaffold__2d__ridge                           MAE=0.7569 RMSE=1.0355 R2=0.5124 cvMAE=0.7606655059519677 params={'m__alpha': 0.1} (6s tune, 4s fit)
+scaffold__2d__tree                            MAE=0.6920 RMSE=0.9916 R2=0.5529 cvMAE=0.7204304693025155 params={'m__max_depth': None, 'm__min_samples_leaf': 50} (14s tune, 29s fit)
+random_s1__composition__mean                  MAE=1.1764 RMSE=1.5213 R2=-0.0000 cvMAE=None params={} (0s tune, 0s fit)
+random_s1__composition__linreg_comp           MAE=1.0075 RMSE=1.3511 R2=0.2112 cvMAE=None params={} (0s tune, 0s fit)
+Traceback (most recent call last):
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/src/train_eval.py", line 126, in <module>
+    main()
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/src/train_eval.py", line 122, in main
+    run_one(df, splits, split, fs, m, force=a.force)
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/src/train_eval.py", line 67, in run_one
+    gs.fit(X[sub], y[sub])
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/sklearn/base.py", line 1403, in wrapper
+    return fit_method(estimator, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/sklearn/model_selection/_search.py", line 1134, in fit
+    self._run_search(evaluate_candidates, callback_ctx=root_callback_ctx)
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/sklearn/model_selection/_search.py", line 1721, in _run_search
+    evaluate_candidates(ParameterGrid(self.param_grid), callback_ctx=search_ctx)
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/sklearn/model_selection/_search.py", line 1083, in evaluate_candidates
+    out = parallel(
+          ^^^^^^^^^
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/sklearn/utils/parallel.py", line 91, in __call__
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/joblib/parallel.py", line 2098, in __call__
+    return output if self.return_generator else list(output)
+                                                ^^^^^^^^^^^^
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/joblib/parallel.py", line 1704, in _get_outputs
+    yield from self._retrieve()
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/joblib/parallel.py", line 1806, in _retrieve
+    self._raise_error_fast()
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/joblib/parallel.py", line 1885, in _raise_error_fast
+    error_job.get_result(self.timeout)
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/joblib/parallel.py", line 780, in get_result
+    return self._return_or_raise()
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ramcharan/Documents/ML335-Project/qm9-dipole/.venv/lib/python3.12/site-packages/joblib/parallel.py", line 795, in _return_or_raise
+    raise self._result
+joblib.externals.loky.process_executor.TerminatedWorkerError: A worker process managed by the executor was unexpectedly terminated. This could be caused by a segmentation fault while calling the function or by an excessive memory usage causing the Operating System to kill the worker.
+
+The exit codes of the workers are {SIGTERM(-15)}
+Detailed tracebacks of the workers should have been printed to stderr in the executor process if faulthandler was not disabled.
+random_s0__composition__ridge                 MAE=1.0054 RMSE=1.3398 R2=0.2265 cvMAE=1.0087840156292693 params={'m__alpha': 0.1} (4s tune, 0s fit)
+=== restart 20:26 sequential ===
+skip scaffold__composition__mean (exists)
+skip scaffold__composition__linreg_comp (exists)
+skip scaffold__2d__ridge (exists)
+skip scaffold__2d__tree (exists)
+scaffold__2d__hgb                             MAE=0.6052 RMSE=0.8566 R2=0.6664 cvMAE=0.6474917835286427 params={'m__l2_regularization': 1.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (47s tune, 74s fit)
+scaffold__2d__rf                              MAE=0.6104 RMSE=0.8746 R2=0.6522 cvMAE=0.6444187786116666 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (56s tune, 39s fit)
+skip scaffold__composition__mean (exists)
+skip scaffold__composition__linreg_comp (exists)
+scaffold__full__ridge                         MAE=0.5695 RMSE=0.8354 R2=0.6827 cvMAE=0.5844772476213741 params={'m__alpha': 0.1} (2s tune, 4s fit)
+scaffold__full__tree                          MAE=0.5101 RMSE=0.8138 R2=0.6989 cvMAE=0.5513372207773809 params={'m__max_depth': 14, 'm__min_samples_leaf': 20} (9s tune, 15s fit)
+scaffold__full__hgb                           MAE=0.3930 RMSE=0.6117 R2=0.8299 cvMAE=0.4338632981413735 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (128s tune, 82s fit)
+scaffold__full__rf                            MAE=0.4135 RMSE=0.6627 R2=0.8003 cvMAE=0.4653386287 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (72s tune, 50s fit)
+size_le8__composition__mean                   MAE=1.1938 RMSE=1.5620 R2=-0.0082 cvMAE=None params={} (0s tune, 0s fit)
+size_le8__composition__linreg_comp            MAE=1.0243 RMSE=1.3760 R2=0.2175 cvMAE=None params={} (0s tune, 0s fit)
+=== restart 20:42 chain3 ===
+skip size_le8__composition__mean (exists)
+skip size_le8__composition__linreg_comp (exists)
+size_le8__2d__ridge                           MAE=0.7643 RMSE=1.0670 R2=0.5295 cvMAE=0.7000457530991862 params={'m__alpha': 0.1} (6s tune, 1s fit)
+size_le8__2d__tree                            MAE=0.7259 RMSE=1.0779 R2=0.5199 cvMAE=0.6383339143673515 params={'m__max_depth': 14, 'm__min_samples_leaf': 20} (7s tune, 2s fit)
+size_le8__2d__hgb                             MAE=0.6474 RMSE=0.9370 R2=0.6372 cvMAE=0.5471292088006836 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (69s tune, 19s fit)
+size_le8__2d__rf                              MAE=0.6449 RMSE=0.9458 R2=0.6304 cvMAE=0.5588592611472223 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (58s tune, 6s fit)
+skip size_le8__composition__mean (exists)
+skip size_le8__composition__linreg_comp (exists)
+size_le8__full__ridge                         MAE=1.9155 RMSE=2.1358 R2=-0.8848 cvMAE=0.5310901693891226 params={'m__alpha': 0.1} (2s tune, 1s fit)
+size_le8__full__tree                          MAE=0.5716 RMSE=0.9343 R2=0.6393 cvMAE=0.4810791911476918 params={'m__max_depth': None, 'm__min_samples_leaf': 20} (10s tune, 4s fit)
+size_le8__full__hgb                           MAE=0.4499 RMSE=0.7188 R2=0.7865 cvMAE=0.3497421754748979 params={'m__l2_regularization': 1.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (188s tune, 64s fit)
+size_le8__full__rf                            MAE=0.4670 RMSE=0.7540 R2=0.7651 cvMAE=0.39445907503333333 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (65s tune, 7s fit)
+size_control__composition__mean               MAE=1.1967 RMSE=1.5560 R2=-0.0004 cvMAE=None params={} (0s tune, 0s fit)
+size_control__composition__linreg_comp        MAE=1.0223 RMSE=1.3822 R2=0.2106 cvMAE=None params={} (0s tune, 0s fit)
+size_control__2d__ridge                       MAE=0.7576 RMSE=1.0538 R2=0.5411 cvMAE=0.7497965541374247 params={'m__alpha': 0.1} (2s tune, 1s fit)
+size_control__2d__tree                        MAE=0.7155 RMSE=1.0413 R2=0.5519 cvMAE=0.7216789907514585 params={'m__max_depth': 10, 'm__min_samples_leaf': 20} (7s tune, 2s fit)
+size_control__2d__hgb                         MAE=0.6338 RMSE=0.9144 R2=0.6545 cvMAE=0.6433400135105003 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (45s tune, 15s fit)
+size_control__2d__rf                          MAE=0.6338 RMSE=0.9299 R2=0.6427 cvMAE=0.6442830013833334 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (55s tune, 6s fit)
+skip size_control__composition__mean (exists)
+skip size_control__composition__linreg_comp (exists)
+size_control__full__ridge                     MAE=0.5826 RMSE=0.8628 R2=0.6924 cvMAE=0.570703855740849 params={'m__alpha': 0.1} (2s tune, 1s fit)
+size_control__full__tree                      MAE=0.5397 RMSE=0.8708 R2=0.6867 cvMAE=0.549515357942379 params={'m__max_depth': None, 'm__min_samples_leaf': 20} (9s tune, 3s fit)
+size_control__full__hgb                       MAE=0.4198 RMSE=0.6651 R2=0.8172 cvMAE=0.43429079019375455 params={'m__l2_regularization': 1.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (109s tune, 38s fit)
+size_control__full__rf                        MAE=0.4496 RMSE=0.7264 R2=0.7820 cvMAE=0.46151446693333337 params={'m__max_features': 0.33, 'm__min_samples_leaf': 1} (68s tune, 8s fit)
+skip random_s0__composition__ridge (exists)
+skip random_s0__composition__hgb (exists)
+random_s0__2d_phys__ridge                     MAE=0.5764 RMSE=0.8526 R2=0.6868 cvMAE=0.5738051060450837 params={'m__alpha': 0.1} (5s tune, 3s fit)
+random_s0__2d_phys__hgb                       MAE=0.3452 RMSE=0.5414 R2=0.8737 cvMAE=0.43835355809386345 params={'m__l2_regularization': 1.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (73s tune, 86s fit)
+random_s0__2d_geo__ridge                      MAE=0.7431 RMSE=1.0278 R2=0.5449 cvMAE=0.741544782128045 params={'m__alpha': 0.1} (2s tune, 3s fit)
+random_s0__2d_geo__hgb                        MAE=0.5126 RMSE=0.7304 R2=0.7701 cvMAE=0.6315446856039009 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (85s tune, 95s fit)
+EXTRA_DONE
+skip random_s1__composition__mean (exists)
+skip random_s1__composition__linreg_comp (exists)
+random_s1__2d__ridge                          MAE=0.7466 RMSE=1.0286 R2=0.5428 cvMAE=0.7567629592508208 params={'m__alpha': 0.1} (5s tune, 3s fit)
+random_s1__2d__tree                           MAE=0.6698 RMSE=0.9670 R2=0.5959 cvMAE=0.7322560250117982 params={'m__max_depth': 10, 'm__min_samples_leaf': 20} (7s tune, 8s fit)
+random_s1__2d__hgb                            MAE=0.5370 RMSE=0.7732 R2=0.7417 cvMAE=0.6489307279081692 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (61s tune, 84s fit)
+skip random_s1__composition__mean (exists)
+skip random_s1__composition__linreg_comp (exists)
+random_s1__full__ridge                        MAE=0.5688 RMSE=0.8290 R2=0.7030 cvMAE=0.5781331908931074 params={'m__alpha': 0.1} (2s tune, 4s fit)
+random_s1__full__tree                         MAE=0.4891 RMSE=0.7585 R2=0.7514 cvMAE=0.5527777361693464 params={'m__max_depth': 10, 'm__min_samples_leaf': 20} (9s tune, 13s fit)
+random_s1__full__hgb                          MAE=0.3397 RMSE=0.5204 R2=0.8830 cvMAE=0.4329253552376941 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (132s tune, 96s fit)
+random_s2__composition__mean                  MAE=1.1956 RMSE=1.5309 R2=-0.0000 cvMAE=None params={} (0s tune, 0s fit)
+random_s2__composition__linreg_comp           MAE=1.0145 RMSE=1.3487 R2=0.2239 cvMAE=None params={} (0s tune, 0s fit)
+random_s2__2d__ridge                          MAE=0.7457 RMSE=1.0252 R2=0.5515 cvMAE=0.7534762834573824 params={'m__alpha': 0.1} (2s tune, 3s fit)
+random_s2__2d__tree                           MAE=0.6767 RMSE=0.9768 R2=0.5929 cvMAE=0.7181399875353547 params={'m__max_depth': 10, 'm__min_samples_leaf': 20} (7s tune, 8s fit)
+random_s2__2d__hgb                            MAE=0.5401 RMSE=0.7825 R2=0.7387 cvMAE=0.6461343592732637 params={'m__l2_regularization': 0.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (48s tune, 85s fit)
+skip random_s2__composition__mean (exists)
+skip random_s2__composition__linreg_comp (exists)
+random_s2__full__ridge                        MAE=0.5691 RMSE=0.8271 R2=0.7081 cvMAE=0.5779594013851593 params={'m__alpha': 0.1} (2s tune, 4s fit)
+random_s2__full__tree                         MAE=0.4441 RMSE=0.7312 R2=0.7719 cvMAE=0.5559857593179153 params={'m__max_depth': None, 'm__min_samples_leaf': 20} (9s tune, 17s fit)
+random_s2__full__hgb                          MAE=0.3422 RMSE=0.5292 R2=0.8805 cvMAE=0.43637081833133645 params={'m__l2_regularization': 1.0, 'm__learning_rate': 0.05, 'm__max_leaf_nodes': 63} (118s tune, 97s fit)
+CHAIN3_DONE

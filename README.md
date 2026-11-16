@@ -17,7 +17,35 @@ split with a size-matched control.
 
 ## Headline results
 
-<!-- RESULTS_TABLE -->
+Test set of the main random split (26,394 molecules). MAE / RMSE in Debye. 95% bootstrap CI on seed 0; 
+mean ± sd over 3 random splits where available.
+
+| Model | Features | MAE [95% CI] | MAE over seeds | RMSE | R² |
+|---|---|---|---|---|---|
+| **Gradient boosting** | structure + geometry | **0.341** [0.337, 0.346] | 0.341 ± 0.001 | 0.530 | 0.879 |
+| MLP (neural net) | structure + geometry | 0.356 [0.351, 0.361] | 1 seed | 0.552 | 0.869 |
+| Random forest | structure + geometry | 0.363 [0.358, 0.369] | 1 seed | 0.595 | 0.847 |
+| SVR (RBF) | structure + geometry | 0.428 [0.422, 0.434] | 1 seed | 0.688 | 0.796 |
+| Decision tree | structure + geometry | 0.461 [0.454, 0.468] | 0.465 ± 0.023 | 0.741 | 0.764 |
+| Gradient boosting | structure only | 0.542 [0.535, 0.549] | 0.540 ± 0.002 | 0.784 | 0.735 |
+| Random forest | structure only | 0.549 [0.542, 0.556] | 1 seed | 0.816 | 0.713 |
+| Ridge | structure + geometry | 0.573 [0.565, 0.580] | 0.570 ± 0.002 | 0.843 | 0.694 |
+| Lasso | structure + geometry | 0.575 [0.568, 0.583] | 1 seed | 0.848 | 0.690 |
+| MLP (neural net) | structure only | 0.575 [0.568, 0.583] | 1 seed | 0.828 | 0.705 |
+| k-NN | structure + geometry | 0.578 [0.570, 0.586] | 1 seed | 0.859 | 0.682 |
+| k-NN | structure only | 0.613 [0.605, 0.621] | 1 seed | 0.902 | 0.649 |
+| SVR (RBF) | structure only | 0.623 [0.615, 0.631] | 1 seed | 0.920 | 0.635 |
+| Decision tree | structure only | 0.667 [0.659, 0.675] | 0.671 ± 0.005 | 0.960 | 0.603 |
+| Ridge | structure only | 0.748 [0.739, 0.757] | 0.747 ± 0.001 | 1.039 | 0.535 |
+| Lasso | structure only | 0.751 [0.743, 0.760] | 1 seed | 1.044 | 0.531 |
+| Linear reg. on atom counts | atom counts | 1.005 [0.995, 1.016] | 1.009 ± 0.005 | 1.340 | 0.227 |
+| Mean baseline | none | 1.190 [1.179, 1.202] | 1.187 ± 0.010 | 1.523 | -0.000 |
+
+**Robustness (gradient boosting, full features):** random split ring-only control 0.334 → scaffold split 0.393 (+18%); size-matched random control 0.420 → train ≤8 / test 9 heavy atoms 0.450 (+7%). Ridge with full features fails the size test (0.583 → 1.916) because one Coulomb eigenvalue leaves its training range.
+
+**Ablation (gradient boosting, seed 0):** Composition (atom counts) 0.950, Structure only (2D graph) 0.542, 2D + Coulomb/shape geometry 0.513, 2D + dipole estimates 0.345, Structure + geometry (full) 0.341
+
+All numbers: `results/metrics.csv`, `results/summary.json`, `notebooks/02_results_walkthrough.ipynb`.
 
 ## Repository layout
 

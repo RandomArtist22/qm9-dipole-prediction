@@ -122,7 +122,7 @@
     rows.forEach((r) => {
       const cls = r === bestKey ? "best" : (r.featureset === "composition" ? "base" : "");
       const params = Object.entries(r.best_params_s0 || {}).map(([k, v]) => `${k.replace("m__", "")}=${v}`).join(", ") || "—";
-      h += `<tr class="${cls}"><td>${r.model_label}</td><td>${r.featureset === "composition" ? "atom counts" : r.featureset === "2d" ? "structure only" : "structure + geometry"}</td>
+      h += `<tr class="${cls}"><td>${r.model_label}</td><td>${r.model === "mean" ? "none" : r.featureset === "composition" ? "atom counts" : r.featureset === "2d" ? "structure only" : "structure + geometry"}</td>
         <td class="n">${f(r.mae_s0)} [${f(r.mae_ci_lo)}, ${f(r.mae_ci_hi)}]</td>
         <td class="n">${r.n_seeds > 1 ? `${f(r.mae_mean)} ± ${f(r.mae_std)} (${r.n_seeds})` : "1 seed"}</td>
         <td class="n">${f(r.rmse_s0)}</td><td class="n">${f(r.r2_s0)}</td><td class="n">${r.model === "mean" ? "—" : "−" + pct(r.improve_vs_mean_pct)}</td>
@@ -209,9 +209,10 @@
     Plotly.react("plot-robust", tr, baseLayout({ barmode: "group", height: 400, yaxis: { title: "test MAE (D)", gridcolor: css("--line") }, margin: { l: 60, r: 10, t: 10, b: 110 } }), CFG);
     let h = `<thead><tr><th>Model</th><th>Features</th><th class="n">random (all)</th><th class="n">random ring-only</th><th class="n">scaffold</th><th class="n">scaffold vs ring-only</th><th class="n">size control</th><th class="n">≤8 → 9</th><th class="n">size vs control</th></tr></thead><tbody>`;
     rr.forEach((r) => {
-      const d1 = r.scaffold && r.random_ring_only ? "+" + pct(100 * (r.scaffold / r.random_ring_only - 1)) : "–";
+      const sgn = (v) => (v >= 0 ? "+" : "−") + pct(Math.abs(v));
+      const d1 = r.scaffold && r.random_ring_only ? sgn(100 * (r.scaffold / r.random_ring_only - 1)) : "–";
       const d2 = r.size_le8 && r.size_control ? (r.size_le8 >= r.size_control ? "+" : "−") + pct(Math.abs(100 * (r.size_le8 / r.size_control - 1))) : "–";
-      h += `<tr><td>${r.model_label}</td><td>${r.featureset === "composition" ? "atom counts" : r.featureset === "full" ? "+ geometry" : "structure only"}</td>
+      h += `<tr><td>${r.model_label}</td><td>${r.model === "mean" ? "none" : r.featureset === "composition" ? "atom counts" : r.featureset === "full" ? "+ geometry" : "structure only"}</td>
         <td class="n">${f(r.random_all)}</td><td class="n">${f(r.random_ring_only)}</td><td class="n">${f(r.scaffold)}</td><td class="n">${d1}</td>
         <td class="n">${f(r.size_control)}</td><td class="n">${f(r.size_le8)}</td><td class="n">${d2}</td></tr>`;
     });

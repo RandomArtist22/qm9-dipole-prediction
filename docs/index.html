@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2210%22 cy=%2216%22 r=%227%22 fill=%22%232f5bd3%22/%3E%3Ccircle cx=%2223%22 cy=%2216%22 r=%225%22 fill=%22%23d99a06%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4">
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.1.7/dist/smiles-drawer.min.js"></script>
 </head>
@@ -187,7 +187,7 @@
     <div>
       <h3>Main protocol</h3>
       <ol class="tight">
-        <li><b>Split</b>: 80% train / 20% test, random but <b>grouped by 2D graph</b>, repeated with 3 seeds.</li>
+        <li><b>Split</b>: 80% train / 20% test, random but <b>grouped by 2D graph</b>; seed 0 for every model, plus seeds 1 and 2 for the baselines, Ridge, the tree and gradient boosting.</li>
         <li><b>Tune</b>: 5-fold cross-validation (MAE) on a random 15k subsample of the <i>training</i> part only.</li>
         <li><b>Refit</b> the chosen setting on the full training part (SVR: 20k).</li>
         <li><b>Test once</b> on the held-out 20% (<span data-v="n_test"></span> molecules).</li>
@@ -243,6 +243,11 @@
       <i>weakest</i> penalty in each grid. With ~100k molecules and ~250 features the linear models are limited by bias, not
       variance, so regularisation barely matters and sparsity (Lasso) brings nothing. The dipole is a non-linear function
       (the norm of a vector sum) of the features.</p>
+    <p><b>How certain are these numbers?</b> Across three different random splits the best model's MAE varies by only
+      ± 0.001 D (sd), and the 95% bootstrap interval on seed 0 is about ± 0.005 D. So the large effects are clearly real: geometry
+      vs structure-only (−0.200 D, CI [−0.206, −0.195]) and best model vs the atom-count baseline (−0.66 D). Gradient boosting also beats the random forest
+      (−0.022 D) and the MLP (−0.015 D) by more than test-set noise, but those two were run on one seed with small tuning grids. “Gradient boosting
+      is the best model” is therefore a weaker claim than “geometry features help a lot”.</p>
     <p><b>Why is the CV error higher than the test error?</b> The tuning CV fits models on 12k molecules (4/5 of a 15k subsample);
       the final models are refit on 105k. The learning curve below shows the error is still falling with more data, so the
       CV scores were used only to <i>rank</i> settings, never as an estimate of final performance.</p>
@@ -395,7 +400,7 @@
     <li><b>Data cleaning.</b> 1.4% of molecules were dropped as unparseable (slightly lower μ on average), and QM9's official
       list of ~3k geometry-inconsistent molecules was not applied.</li>
     <li><b>Compute-driven shortcuts.</b> Tuning used a 15k subsample with small grids; SVR was fit on 20k molecules only; k-NN, SVR,
-      Lasso and the MLP were run on one seed. The ranking among the top non-linear models is therefore less certain than
+      Lasso, the MLP and the random forest were run on one seed (Ridge, the tree, gradient boosting and the baselines on three). The ranking among the top non-linear models is therefore less certain than
       the large gaps (baseline vs model, 2D vs geometry).</li>
     <li><b>No causal claim.</b> Feature importance shows what the model uses to predict, not what makes a molecule polar.</li>
   </ul>
@@ -459,6 +464,6 @@ python analyze.py              # tables, CIs, figures, site data</code></pre>
 </section>
 </main>
 <footer>ES 335 Machine Learning · IIT Gandhinagar · 2026</footer>
-<script src="app.js"></script>
+<script src="app.js?v=3"></script>
 </body>
 </html>

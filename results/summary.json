@@ -1,0 +1,1417 @@
+{
+ "data_quality": {
+  "n_sdf_blocks": 133885,
+  "n_label_rows": 133885,
+  "n_rdkit_failures": 1915,
+  "mu_failed_mean": 2.4981744647519584,
+  "mu_failed_median": 2.1936,
+  "mu_kept_mean": 2.709053743274987,
+  "mu_kept_median": 2.5056,
+  "n_kept": 131970,
+  "n_missing_labels": 0,
+  "n_features": 256,
+  "features_with_nan": {},
+  "features_with_inf": {},
+  "n_mu_exactly_zero": 45,
+  "n_mu_below_0.1": 921,
+  "n_mu_above_10": 280,
+  "mu_describe": {
+   "count": 131970.0,
+   "mean": 2.709053743274987,
+   "std": 1.5350512935514482,
+   "min": 0.0,
+   "25%": 1.5854,
+   "50%": 2.5056,
+   "75%": 3.6429,
+   "max": 29.5564
+  },
+  "mu_skew": 1.4560728158503724,
+  "n_rows_sharing_isomeric_smiles": 536,
+  "n_rows_sharing_2d_graph": 665,
+  "n_2d_graphs_with_duplicates": 326,
+  "median_mu_spread_within_same_2d_graph": 0.0006000000000001907,
+  "max_mu_spread_within_same_2d_graph": 5.239000000000001,
+  "n_acyclic": 14127,
+  "n_unique_scaffolds": 14712,
+  "heavy_atom_counts": {
+   "1": 3,
+   "2": 5,
+   "3": 9,
+   "4": 31,
+   "5": 129,
+   "6": 613,
+   "7": 3167,
+   "8": 18078,
+   "9": 109935
+  },
+  "top_mu_molecules": [
+   {
+    "mol_id": "gdb_123126",
+    "smiles": "[NH3+]CCCCCC(=O)[O-]",
+    "mu": 29.5564
+   },
+   {
+    "mol_id": "gdb_121864",
+    "smiles": "C[C@@H](CCC[NH3+])C(=O)[O-]",
+    "mu": 25.2022
+   },
+   {
+    "mol_id": "gdb_101807",
+    "smiles": "[NH3+]C[C@@H](O)CCC(=O)[O-]",
+    "mu": 22.9605
+   },
+   {
+    "mol_id": "gdb_97476",
+    "smiles": "[NH3+]CC#CC#CC(=O)[O-]",
+    "mu": 22.6486
+   },
+   {
+    "mol_id": "gdb_56343",
+    "smiles": "N/C=[NH+]/CCCC(=O)[O-]",
+    "mu": 21.9335
+   },
+   {
+    "mol_id": "gdb_97458",
+    "smiles": "N/C=[NH+]/CCCC(=O)[O-]",
+    "mu": 21.9326
+   },
+   {
+    "mol_id": "gdb_100457",
+    "smiles": "[NH3+]C[C@@H](O)C#CC(=O)[O-]",
+    "mu": 21.512
+   },
+   {
+    "mol_id": "gdb_130454",
+    "smiles": "[NH3+]CCc1cc(=O)o[nH]1",
+    "mu": 20.9824
+   },
+   {
+    "mol_id": "gdb_121600",
+    "smiles": "C[NH2+]CCC(=O)C(=O)[O-]",
+    "mu": 20.8468
+   },
+   {
+    "mol_id": "gdb_130453",
+    "smiles": "[NH-]c1nc(CC[NH3+])no1",
+    "mu": 20.3686
+   }
+  ],
+  "failed_ids_sample": [
+   "gdb_106",
+   "gdb_317",
+   "gdb_652",
+   "gdb_654",
+   "gdb_697",
+   "gdb_699",
+   "gdb_1150",
+   "gdb_1898",
+   "gdb_2003",
+   "gdb_2007",
+   "gdb_2010",
+   "gdb_2013",
+   "gdb_2018",
+   "gdb_2044",
+   "gdb_2046",
+   "gdb_2411",
+   "gdb_2412",
+   "gdb_2419",
+   "gdb_2422",
+   "gdb_2423"
+  ],
+  "n_comp_nheavy_overcounted": 1554
+ },
+ "splits": {
+  "random_s0": {
+   "n_train": 105576,
+   "n_test": 26394,
+   "mu_mean_train": 2.7101,
+   "mu_mean_test": 2.7049,
+   "test_frac_acyclic": 0.1081,
+   "graph_overlap": 0,
+   "scaffold_overlap_rows": 21157
+  },
+  "random_s1": {
+   "n_train": 105576,
+   "n_test": 26394,
+   "mu_mean_train": 2.7097,
+   "mu_mean_test": 2.7065,
+   "test_frac_acyclic": 0.105,
+   "graph_overlap": 0,
+   "scaffold_overlap_rows": 21265
+  },
+  "random_s2": {
+   "n_train": 105576,
+   "n_test": 26394,
+   "mu_mean_train": 2.7099,
+   "mu_mean_test": 2.7057,
+   "test_frac_acyclic": 0.1082,
+   "graph_overlap": 0,
+   "scaffold_overlap_rows": 21204
+  },
+  "scaffold": {
+   "n_train": 105157,
+   "n_test": 26813,
+   "mu_mean_train": 2.7056,
+   "mu_mean_test": 2.7227,
+   "test_frac_acyclic": 0.0,
+   "graph_overlap": 0,
+   "scaffold_overlap_rows": 0
+  },
+  "size_le8": {
+   "n_train": 22035,
+   "n_test": 21987,
+   "mu_mean_train": 2.5879,
+   "mu_mean_test": 2.7244,
+   "test_frac_acyclic": 0.0904,
+   "graph_overlap": 0,
+   "scaffold_overlap_rows": 17291
+  },
+  "size_control": {
+   "n_train": 22035,
+   "n_test": 21987,
+   "mu_mean_train": 2.6937,
+   "mu_mean_test": 2.7244,
+   "test_frac_acyclic": 0.0904,
+   "graph_overlap": 0,
+   "scaffold_overlap_rows": 16749
+  }
+ },
+ "model_table": [
+  {
+   "model": "hgb",
+   "model_label": "Gradient boosting",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.3412340193,
+   "mae_ci_lo": 0.3365287139,
+   "mae_ci_hi": 0.3458931091,
+   "rmse_s0": 0.5297908143,
+   "r2_s0": 0.8790634545,
+   "n_seeds": 3,
+   "mae_mean": 0.3410376057,
+   "mae_std": 0.0013004202,
+   "r2_mean": 0.8808487381,
+   "cv_mae_s0": 0.4387575948,
+   "best_params_s0": {
+    "m__l2_regularization": 1.0,
+    "m__learning_rate": 0.05,
+    "m__max_leaf_nodes": 63
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 71.335517511,
+   "improve_vs_ols_pct": 66.0583665361
+  },
+  {
+   "model": "mlp",
+   "model_label": "MLP (neural net)",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.3558665332,
+   "mae_ci_lo": 0.350920289,
+   "mae_ci_hi": 0.360853655,
+   "rmse_s0": 0.552349104,
+   "r2_s0": 0.8685453302,
+   "n_seeds": 1,
+   "mae_mean": 0.3558665332,
+   "mae_std": null,
+   "r2_mean": 0.8685453302,
+   "cv_mae_s0": 0.4943547649,
+   "best_params_s0": {
+    "m__alpha": 0.01
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 70.1063509722,
+   "improve_vs_ols_pct": 64.6029095906
+  },
+  {
+   "model": "rf",
+   "model_label": "Random forest",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.3632286203,
+   "mae_ci_lo": 0.3578571389,
+   "mae_ci_hi": 0.3687850838,
+   "rmse_s0": 0.595394708,
+   "r2_s0": 0.8472579372,
+   "n_seeds": 1,
+   "mae_mean": 0.3632286203,
+   "mae_std": null,
+   "r2_mean": 0.8472579372,
+   "cv_mae_s0": 0.4624825574,
+   "best_params_s0": {
+    "m__max_features": 0.33,
+    "m__min_samples_leaf": 1
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 69.487917856,
+   "improve_vs_ols_pct": 63.8706225116
+  },
+  {
+   "model": "svr",
+   "model_label": "SVR (RBF)",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.4282257412,
+   "mae_ci_lo": 0.4220405463,
+   "mae_ci_hi": 0.4343607799,
+   "rmse_s0": 0.6875881367,
+   "r2_s0": 0.7962932308,
+   "n_seeds": 1,
+   "mae_mean": 0.4282257412,
+   "mae_std": null,
+   "r2_mean": 0.7962932308,
+   "cv_mae_s0": 0.4497668976,
+   "best_params_s0": {
+    "m__C": 10,
+    "m__gamma": 0.002
+   },
+   "n_train_fit": 20000,
+   "improve_vs_mean_pct": 64.0280025852,
+   "improve_vs_ols_pct": 57.4055330778
+  },
+  {
+   "model": "tree",
+   "model_label": "Decision tree",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.4607827842,
+   "mae_ci_lo": 0.4537533664,
+   "mae_ci_hi": 0.4678674023,
+   "rmse_s0": 0.7405560887,
+   "r2_s0": 0.7636995085,
+   "n_seeds": 3,
+   "mae_mean": 0.4646698255,
+   "mae_std": 0.0227357834,
+   "r2_mean": 0.7623107965,
+   "cv_mae_s0": 0.5548409224,
+   "best_params_s0": {
+    "m__max_depth": 14,
+    "m__min_samples_leaf": 50
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 61.2931322727,
+   "improve_vs_ols_pct": 54.1671712565
+  },
+  {
+   "model": "hgb",
+   "model_label": "Gradient boosting",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.5415314265,
+   "mae_ci_lo": 0.5347099623,
+   "mae_ci_hi": 0.5487447286,
+   "rmse_s0": 0.783852578,
+   "r2_s0": 0.7352612628,
+   "n_seeds": 3,
+   "mae_mean": 0.5395672801,
+   "mae_std": 0.0023044762,
+   "r2_mean": 0.7385384784,
+   "cv_mae_s0": 0.6439036281,
+   "best_params_s0": {
+    "m__l2_regularization": 0.0,
+    "m__learning_rate": 0.05,
+    "m__max_leaf_nodes": 63
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 54.5100511281,
+   "improve_vs_ols_pct": 46.1353201999
+  },
+  {
+   "model": "rf",
+   "model_label": "Random forest",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.5488795027,
+   "mae_ci_lo": 0.5415680028,
+   "mae_ci_hi": 0.5564626717,
+   "rmse_s0": 0.8162346793,
+   "r2_s0": 0.7129359576,
+   "n_seeds": 1,
+   "mae_mean": 0.5488795027,
+   "mae_std": null,
+   "r2_mean": 0.7129359576,
+   "cv_mae_s0": 0.6475554018,
+   "best_params_s0": {
+    "m__max_features": 0.33,
+    "m__min_samples_leaf": 1
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 53.8927949601,
+   "improve_vs_ols_pct": 45.4044267461
+  },
+  {
+   "model": "ridge",
+   "model_label": "Ridge",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.5728127955,
+   "mae_ci_lo": 0.5650295628,
+   "mae_ci_hi": 0.5799888442,
+   "rmse_s0": 0.8432741768,
+   "r2_s0": 0.6936017267,
+   "n_seeds": 3,
+   "mae_mean": 0.5702206204,
+   "mae_std": 0.0022500503,
+   "r2_mean": 0.7015753009,
+   "cv_mae_s0": 0.5711466017,
+   "best_params_s0": {
+    "m__alpha": 0.1
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 51.8823405107,
+   "improve_vs_ols_pct": 43.0238462475
+  },
+  {
+   "model": "lasso",
+   "model_label": "Lasso",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.5754269725,
+   "mae_ci_lo": 0.5676497132,
+   "mae_ci_hi": 0.5829145198,
+   "rmse_s0": 0.8482456428,
+   "r2_s0": 0.6899783767,
+   "n_seeds": 1,
+   "mae_mean": 0.5754269725,
+   "mae_std": null,
+   "r2_mean": 0.6899783767,
+   "cv_mae_s0": 0.5728271381,
+   "best_params_s0": {
+    "m__alpha": 0.0001
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 51.6627433276,
+   "improve_vs_ols_pct": 42.7638210717
+  },
+  {
+   "model": "mlp",
+   "model_label": "MLP (neural net)",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.5754946691,
+   "mae_ci_lo": 0.5681790196,
+   "mae_ci_hi": 0.5826158284,
+   "rmse_s0": 0.827845897,
+   "r2_s0": 0.7047106986,
+   "n_seeds": 1,
+   "mae_mean": 0.5754946691,
+   "mae_std": null,
+   "r2_mean": 0.7047106986,
+   "cv_mae_s0": 0.6918532456,
+   "best_params_s0": {
+    "m__alpha": 0.01
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 51.6570566528,
+   "improve_vs_ols_pct": 42.7570874761
+  },
+  {
+   "model": "knn",
+   "model_label": "k-NN",
+   "featureset": "full",
+   "featureset_label": "Structure + geometry (full)",
+   "mae_s0": 0.5779571197,
+   "mae_ci_lo": 0.5703822469,
+   "mae_ci_hi": 0.585819093,
+   "rmse_s0": 0.8589527692,
+   "r2_s0": 0.682102378,
+   "n_seeds": 1,
+   "mae_mean": 0.5779571197,
+   "mae_std": null,
+   "r2_mean": 0.682102378,
+   "cv_mae_s0": 0.6722201623,
+   "best_params_s0": {
+    "m__n_neighbors": 10
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 51.4502048495,
+   "improve_vs_ols_pct": 42.5121541133
+  },
+  {
+   "model": "knn",
+   "model_label": "k-NN",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.6131019217,
+   "mae_ci_lo": 0.6054782291,
+   "mae_ci_hi": 0.6213020749,
+   "rmse_s0": 0.9020069507,
+   "r2_s0": 0.6494350607,
+   "n_seeds": 1,
+   "mae_mean": 0.6131019217,
+   "mae_std": null,
+   "r2_mean": 0.6494350607,
+   "cv_mae_s0": 0.6906800345,
+   "best_params_s0": {
+    "m__n_neighbors": 10
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 48.4979565239,
+   "improve_vs_ols_pct": 39.016394837
+  },
+  {
+   "model": "svr",
+   "model_label": "SVR (RBF)",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.6226533865,
+   "mae_ci_lo": 0.6146524481,
+   "mae_ci_hi": 0.6308775035,
+   "rmse_s0": 0.9199063505,
+   "r2_s0": 0.6353838131,
+   "n_seeds": 1,
+   "mae_mean": 0.6226533865,
+   "mae_std": null,
+   "r2_mean": 0.6353838131,
+   "cv_mae_s0": 0.6452453758,
+   "best_params_s0": {
+    "m__C": 10,
+    "m__gamma": 0.002
+   },
+   "n_train_fit": 20000,
+   "improve_vs_mean_pct": 47.6956103919,
+   "improve_vs_ols_pct": 38.0663362293
+  },
+  {
+   "model": "tree",
+   "model_label": "Decision tree",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.666911966,
+   "mae_ci_lo": 0.6586338599,
+   "mae_ci_hi": 0.6752987735,
+   "rmse_s0": 0.959773474,
+   "r2_s0": 0.6030953412,
+   "n_seeds": 3,
+   "mae_mean": 0.6711523478,
+   "mae_std": 0.0050250597,
+   "r2_mean": 0.5973050346,
+   "cv_mae_s0": 0.7165716862,
+   "best_params_s0": {
+    "m__max_depth": 10,
+    "m__min_samples_leaf": 20
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 43.9777827238,
+   "improve_vs_ols_pct": 33.6640539261
+  },
+  {
+   "model": "ridge",
+   "model_label": "Ridge",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.7479419214,
+   "mae_ci_lo": 0.7390114768,
+   "mae_ci_hi": 0.7566143101,
+   "rmse_s0": 1.038569746,
+   "r2_s0": 0.5352493076,
+   "n_seeds": 3,
+   "mae_mean": 0.7467326443,
+   "mae_std": 0.0011325215,
+   "r2_mean": 0.543177204,
+   "cv_mae_s0": 0.7483706751,
+   "best_params_s0": {
+    "m__alpha": 0.1
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 37.1710705965,
+   "improve_vs_ols_pct": 25.6042214066
+  },
+  {
+   "model": "lasso",
+   "model_label": "Lasso",
+   "featureset": "2d",
+   "featureset_label": "Structure only (2D graph)",
+   "mae_s0": 0.7514558557,
+   "mae_ci_lo": 0.7428900665,
+   "mae_ci_hi": 0.7602346782,
+   "rmse_s0": 1.0436776008,
+   "r2_s0": 0.5306666272,
+   "n_seeds": 1,
+   "mae_mean": 0.7514558557,
+   "mae_std": null,
+   "r2_mean": 0.5306666272,
+   "cv_mae_s0": 0.7519160059,
+   "best_params_s0": {
+    "m__alpha": 0.0001
+   },
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 36.8758916241,
+   "improve_vs_ols_pct": 25.254699782
+  },
+  {
+   "model": "linreg_comp",
+   "model_label": "Linear reg. on atom counts",
+   "featureset": "composition",
+   "featureset_label": "Composition (atom counts)",
+   "mae_s0": 1.0053553247,
+   "mae_ci_lo": 0.9948095973,
+   "mae_ci_hi": 1.0160220428,
+   "rmse_s0": 1.3398350301,
+   "r2_s0": 0.2265159412,
+   "n_seeds": 3,
+   "mae_mean": 1.0091174645,
+   "mae_std": 0.0048030535,
+   "r2_mean": 0.2205394655,
+   "cv_mae_s0": null,
+   "best_params_s0": {},
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 15.5477224765,
+   "improve_vs_ols_pct": 0.0
+  },
+  {
+   "model": "mean",
+   "model_label": "Mean baseline",
+   "featureset": "composition",
+   "featureset_label": "Composition (atom counts)",
+   "mae_s0": 1.1904419326,
+   "mae_ci_lo": 1.1788499123,
+   "mae_ci_hi": 1.2018996312,
+   "rmse_s0": 1.5234500781,
+   "r2_s0": -1.18947e-05,
+   "n_seeds": 3,
+   "mae_mean": 1.1874935235,
+   "mae_std": 0.0099046974,
+   "r2_mean": -7.8066e-06,
+   "cv_mae_s0": null,
+   "best_params_s0": {},
+   "n_train_fit": 105576,
+   "improve_vs_mean_pct": 0.0,
+   "improve_vs_ols_pct": -18.4100688962
+  }
+ ],
+ "paired_tests": {
+  "full__hgb_vs_2d__hgb": {
+   "label": "Gradient boosting: full vs structure-only features",
+   "diff": -0.20029740733782256,
+   "ci_lo": -0.20600046984115414,
+   "ci_hi": -0.1947897745041257,
+   "p_boot": 0.0005
+  },
+  "full__hgb_vs_full__rf": {
+   "label": "Full features: gradient boosting vs random forest",
+   "diff": -0.021994601369660575,
+   "ci_lo": -0.025071787460561795,
+   "ci_hi": -0.019154065287609157,
+   "p_boot": 0.0005
+  },
+  "full__hgb_vs_composition__linreg_comp": {
+   "label": "Best model vs linear regression on atom counts",
+   "diff": -0.6641213056410982,
+   "ci_lo": -0.6740594073575098,
+   "ci_hi": -0.6540160636922125,
+   "p_boot": 0.0005
+  },
+  "full__ridge_vs_2d__ridge": {
+   "label": "Ridge: full vs structure-only features",
+   "diff": -0.1751291256151416,
+   "ci_lo": -0.18091376864335254,
+   "ci_hi": -0.16938422173075596,
+   "p_boot": 0.0005
+  },
+  "full__hgb_vs_full__svr": {
+   "label": "Full features: gradient boosting vs SVR",
+   "diff": -0.08699172309961428,
+   "ci_lo": -0.09116707625702082,
+   "ci_hi": -0.08262742318268572,
+   "p_boot": 0.0005
+  },
+  "full__hgb_vs_full__mlp": {
+   "label": "Full features: gradient boosting vs MLP",
+   "diff": -0.014632514508745259,
+   "ci_lo": -0.01843943547059945,
+   "ci_hi": -0.010675111545109667,
+   "p_boot": 0.0005
+  }
+ },
+ "robustness": [
+  {
+   "featureset": "composition",
+   "model": "mean",
+   "model_label": "Mean baseline",
+   "random_all": 1.1904419218519633,
+   "random_ring_only": 1.175999897748743,
+   "scaffold": 1.1686421323596023,
+   "size_le8": 1.1898460674324862,
+   "size_control": 1.1967055543700664
+  },
+  {
+   "featureset": "composition",
+   "model": "linreg_comp",
+   "model_label": "Linear reg. on atom counts",
+   "random_all": 1.005355324171073,
+   "random_ring_only": 0.9812687986252049,
+   "scaffold": 1.008426068950733,
+   "size_le8": 1.025942824320058,
+   "size_control": 1.0223338947735239
+  },
+  {
+   "featureset": "2d",
+   "model": "ridge",
+   "model_label": "Ridge",
+   "random_all": 0.7479419215055928,
+   "random_ring_only": 0.7211290881059719,
+   "scaffold": 0.7569381141565248,
+   "size_le8": 0.7643236983268876,
+   "size_control": 0.7576392220424165
+  },
+  {
+   "featureset": "2d",
+   "model": "tree",
+   "model_label": "Decision tree",
+   "random_all": 0.6669119656272336,
+   "random_ring_only": 0.6440174037819,
+   "scaffold": 0.6920190425397512,
+   "size_le8": 0.7259311541074126,
+   "size_control": 0.7155097329305774
+  },
+  {
+   "featureset": "2d",
+   "model": "rf",
+   "model_label": "Random forest",
+   "random_all": 0.5488795029836477,
+   "random_ring_only": 0.5299150296935211,
+   "scaffold": 0.6104195971711484,
+   "size_le8": 0.6448692063768742,
+   "size_control": 0.6338260806893468
+  },
+  {
+   "featureset": "2d",
+   "model": "hgb",
+   "model_label": "Gradient boosting",
+   "random_all": 0.5415314258677975,
+   "random_ring_only": 0.5231224395305094,
+   "scaffold": 0.6052345351898499,
+   "size_le8": 0.647375033404687,
+   "size_control": 0.6338237624517804
+  },
+  {
+   "featureset": "full",
+   "model": "ridge",
+   "model_label": "Ridge",
+   "random_all": 0.5728127958904512,
+   "random_ring_only": 0.5524789648692939,
+   "scaffold": 0.5695256767982033,
+   "size_le8": 1.915514988620461,
+   "size_control": 0.5825584895343564
+  },
+  {
+   "featureset": "full",
+   "model": "tree",
+   "model_label": "Decision tree",
+   "random_all": 0.46078278281939833,
+   "random_ring_only": 0.4493599051908165,
+   "scaffold": 0.5100991153965716,
+   "size_le8": 0.5715803416672641,
+   "size_control": 0.5397354038460468
+  },
+  {
+   "featureset": "full",
+   "model": "rf",
+   "model_label": "Random forest",
+   "random_all": 0.36322861989963545,
+   "random_ring_only": 0.35524529492974843,
+   "scaffold": 0.4135378817924141,
+   "size_le8": 0.46700444990221496,
+   "size_control": 0.44962887967890114
+  },
+  {
+   "featureset": "full",
+   "model": "hgb",
+   "model_label": "Gradient boosting",
+   "random_all": 0.341234018529975,
+   "random_ring_only": 0.3335410767643077,
+   "scaffold": 0.39304681257053004,
+   "size_le8": 0.4498913157670172,
+   "size_control": 0.41975157025101273
+  }
+ ],
+ "ablation": [
+  {
+   "featureset": "2d",
+   "model": "hgb",
+   "test_mae": 0.5415314264869362,
+   "test_r2": 0.7352612627656303,
+   "featureset_label": "Structure only (2D graph)"
+  },
+  {
+   "featureset": "2d",
+   "model": "ridge",
+   "test_mae": 0.747941921418912,
+   "test_r2": 0.5352493076138881,
+   "featureset_label": "Structure only (2D graph)"
+  },
+  {
+   "featureset": "2d_geo",
+   "model": "hgb",
+   "test_mae": 0.5126380366454145,
+   "test_r2": 0.7701452769712751,
+   "featureset_label": "2D + Coulomb/shape geometry"
+  },
+  {
+   "featureset": "2d_geo",
+   "model": "ridge",
+   "test_mae": 0.7431018245801169,
+   "test_r2": 0.5448500182011696,
+   "featureset_label": "2D + Coulomb/shape geometry"
+  },
+  {
+   "featureset": "2d_phys",
+   "model": "hgb",
+   "test_mae": 0.3451802028214172,
+   "test_r2": 0.8737283317716775,
+   "featureset_label": "2D + dipole estimates"
+  },
+  {
+   "featureset": "2d_phys",
+   "model": "ridge",
+   "test_mae": 0.5764345661985152,
+   "test_r2": 0.6867606438798329,
+   "featureset_label": "2D + dipole estimates"
+  },
+  {
+   "featureset": "composition",
+   "model": "hgb",
+   "test_mae": 0.9498806589016965,
+   "test_r2": 0.2786219157186739,
+   "featureset_label": "Composition (atom counts)"
+  },
+  {
+   "featureset": "composition",
+   "model": "ridge",
+   "test_mae": 1.0053555988031788,
+   "test_r2": 0.22651606994647677,
+   "featureset_label": "Composition (atom counts)"
+  },
+  {
+   "featureset": "full",
+   "model": "hgb",
+   "test_mae": 0.3412340193098016,
+   "test_r2": 0.8790634544891403,
+   "featureset_label": "Structure + geometry (full)"
+  },
+  {
+   "featureset": "full",
+   "model": "ridge",
+   "test_mae": 0.5728127955430502,
+   "test_r2": 0.693601726657253,
+   "featureset_label": "Structure + geometry (full)"
+  }
+ ],
+ "error_analysis": {
+  "by_mu_bin": [
+   {
+    "mu_bin": "0-0.5",
+    "n": 1058,
+    "mae": 0.22922356921068143,
+    "mean_resid": 0.18495642343226096,
+    "mae_2d": 0.4077227458674447,
+    "mae_mean_baseline": 2.4768703445016325
+   },
+   {
+    "mu_bin": "0.5-1",
+    "n": 1403,
+    "mae": 0.3861946515297431,
+    "mean_resid": 0.33757739750691507,
+    "mae_2d": 0.7253033204340544,
+    "mae_mean_baseline": 1.9147958411082826
+   },
+   {
+    "mu_bin": "1-2",
+    "n": 7487,
+    "mae": 0.2619848034055271,
+    "mean_resid": 0.14806672465020734,
+    "mae_2d": 0.41656506749317834,
+    "mae_mean_baseline": 1.1801518275789162
+   },
+   {
+    "mu_bin": "2-3",
+    "n": 6386,
+    "mae": 0.3125480906874343,
+    "mean_resid": 0.041819612792364826,
+    "mae_2d": 0.49235478841214586,
+    "mae_mean_baseline": 0.2967529573277474
+   },
+   {
+    "mu_bin": "3-4",
+    "n": 5106,
+    "mae": 0.35302105964644953,
+    "mean_resid": -0.10538966891744116,
+    "mae_2d": 0.490222442271632,
+    "mae_mean_baseline": 0.7668924401166343
+   },
+   {
+    "mu_bin": "4-5",
+    "n": 3148,
+    "mae": 0.3995509809992667,
+    "mean_resid": -0.2297001975656313,
+    "mae_2d": 0.5980666097541626,
+    "mae_mean_baseline": 1.7283233934734494
+   },
+   {
+    "mu_bin": "5-7",
+    "n": 1614,
+    "mae": 0.5634547963183757,
+    "mean_resid": -0.45883911753256224,
+    "mae_2d": 1.1029556490867407,
+    "mae_mean_baseline": 2.9419032172910935
+   },
+   {
+    "mu_bin": ">7",
+    "n": 192,
+    "mae": 1.5366701173623403,
+    "mean_resid": -1.1183940318425496,
+    "mae_2d": 2.1627551883618037,
+    "mae_mean_baseline": 6.655879909515381
+   }
+  ],
+  "by_heavy": [
+   {
+    "comp_nheavy": 1.0,
+    "n": 1,
+    "mae": 0.009352664375305242
+   },
+   {
+    "comp_nheavy": 3.0,
+    "n": 2,
+    "mae": 0.06982481292486191
+   },
+   {
+    "comp_nheavy": 4.0,
+    "n": 4,
+    "mae": 0.1317077469110489
+   },
+   {
+    "comp_nheavy": 5.0,
+    "n": 26,
+    "mae": 0.22022237921632248
+   },
+   {
+    "comp_nheavy": 6.0,
+    "n": 122,
+    "mae": 0.1896252878467079
+   },
+   {
+    "comp_nheavy": 7.0,
+    "n": 639,
+    "mae": 0.25396738449256745
+   },
+   {
+    "comp_nheavy": 8.0,
+    "n": 3586,
+    "mae": 0.3004845902852687
+   },
+   {
+    "comp_nheavy": 9.0,
+    "n": 22014,
+    "mae": 0.35146597098989923
+   }
+  ],
+  "by_group": [
+   {
+    "group": "Acyclic (no ring)",
+    "n": 2852,
+    "mae": 0.4047358541005697,
+    "mae_2d": 0.6934894750797309,
+    "mean_true": 3.0785092566619916,
+    "mean_resid": -0.005954879596947499
+   },
+   {
+    "group": "Aromatic ring",
+    "n": 4315,
+    "mae": 0.5960335721936826,
+    "mae_2d": 0.732375379136606,
+    "mean_true": 3.1654106836616456,
+    "mean_resid": -0.023417841564684863
+   },
+   {
+    "group": "Nitrile (C#N)",
+    "n": 3296,
+    "mae": 0.40991262306847337,
+    "mae_2d": 0.7353839214110258,
+    "mean_true": 4.10644505461165,
+    "mean_resid": -0.004802238193718555
+   },
+   {
+    "group": "Carbonyl (C=O)",
+    "n": 9392,
+    "mae": 0.4014765957944838,
+    "mae_2d": 0.6662730787096884,
+    "mean_true": 3.363497370102215,
+    "mean_resid": -0.006177265063602813
+   },
+   {
+    "group": "Hydroxyl (OH)",
+    "n": 8327,
+    "mae": 0.36989096795186654,
+    "mae_2d": 0.597054161804092,
+    "mean_true": 2.5157314278851928,
+    "mean_resid": 0.00162908977623302
+   },
+   {
+    "group": "Ether (C-O-C)",
+    "n": 11476,
+    "mae": 0.30644196824907594,
+    "mae_2d": 0.5166635065489756,
+    "mean_true": 2.533236990240502,
+    "mean_resid": -0.007597296757607063
+   },
+   {
+    "group": "Primary amine (NH2)",
+    "n": 3279,
+    "mae": 0.5873787973374701,
+    "mae_2d": 0.7618201830111251,
+    "mean_true": 3.399365233302836,
+    "mean_resid": -0.03538270954457533
+   },
+   {
+    "group": "Fluorine",
+    "n": 424,
+    "mae": 0.557446275113031,
+    "mae_2d": 0.7375303906674655,
+    "mean_true": 2.8708658018867927,
+    "mean_resid": 0.021380689924885076
+   },
+   {
+    "group": "Charged / zwitterion",
+    "n": 702,
+    "mae": 0.6327487928533826,
+    "mae_2d": 0.8395921585608751,
+    "mean_true": 3.771483048433048,
+    "mean_resid": 0.023215120867990022
+   },
+   {
+    "group": "Near-zero dipole (<0.5 D)",
+    "n": 1058,
+    "mae": 0.2292235692106814,
+    "mae_2d": 0.4077227458674447,
+    "mean_true": 0.23323412098298676,
+    "mean_resid": 0.18495642343226093
+   },
+   {
+    "group": "Shares 2D graph w/ another molecule",
+    "n": 128,
+    "mae": 0.7232171837680043,
+    "mae_2d": 0.8108286226898431,
+    "mean_true": 4.613658593749999,
+    "mean_resid": -0.2788321769483388
+   }
+  ],
+  "worst": [
+   {
+    "mol_id": "gdb_22974",
+    "smiles": "O=CC(=[N+]=O)C1C[NH2+]C1",
+    "y_true": 14.061,
+    "pred": 3.7219998836517334,
+    "2d__hgb": 4.836999893188477,
+    "abs_err": 10.339,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_130454",
+    "smiles": "[NH3+]CCc1cc(=O)o[nH]1",
+    "y_true": 20.982,
+    "pred": 11.210000038146973,
+    "2d__hgb": 8.065999984741211,
+    "abs_err": 9.772,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_129996",
+    "smiles": "NC1Cc2[nH]nnc2N1",
+    "y_true": 14.06,
+    "pred": 6.872000217437744,
+    "2d__hgb": 4.750999927520752,
+    "abs_err": 7.188,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_129994",
+    "smiles": "NC1Cc2cn[nH]c2N1",
+    "y_true": 12.522,
+    "pred": 5.484000205993652,
+    "2d__hgb": 3.0250000953674316,
+    "abs_err": 7.038,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_32885",
+    "smiles": "NCCC1=CC(=O)[CH+][OH+]1",
+    "y_true": 11.438,
+    "pred": 4.98799991607666,
+    "2d__hgb": 5.117000102996826,
+    "abs_err": 6.45,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_108410",
+    "smiles": "C[NH2+][C@]12CO[C@H]1[C@H]2C=O",
+    "y_true": 11.943,
+    "pred": 5.986000061035156,
+    "2d__hgb": 5.922999858856201,
+    "abs_err": 5.958,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_130393",
+    "smiles": "[NH3+]Cc1[nH]nnc1CO",
+    "y_true": 11.53,
+    "pred": 6.551000118255615,
+    "2d__hgb": 9.892999649047852,
+    "abs_err": 4.979,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_22195",
+    "smiles": "C[NH2+]C/C(CC#N)=N/O",
+    "y_true": 8.268,
+    "pred": 13.133000373840332,
+    "2d__hgb": 13.446999549865723,
+    "abs_err": 4.865,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_59827",
+    "smiles": "C[NH+](C)C/C=C\\C(=O)[O-]",
+    "y_true": 13.041,
+    "pred": 17.85700035095215,
+    "2d__hgb": 15.524999618530273,
+    "abs_err": 4.815,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_130385",
+    "smiles": "N/C=[NH+]/Cc1nnn[nH]1",
+    "y_true": 15.861,
+    "pred": 11.425999641418457,
+    "2d__hgb": 13.295999526977539,
+    "abs_err": 4.435,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_129340",
+    "smiles": "N/C=[NH+]/Cc1nnn[nH]1",
+    "y_true": 15.859,
+    "pred": 11.425999641418457,
+    "2d__hgb": 13.295999526977539,
+    "abs_err": 4.433,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_74200",
+    "smiles": "CC1=C[C@@H](N)O[CH+]C1=O",
+    "y_true": 7.071,
+    "pred": 2.8440001010894775,
+    "2d__hgb": 3.680999994277954,
+    "abs_err": 4.227,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_90696",
+    "smiles": "C[C@H]1C[C@@H]2C(=O)C=C[N@@H+]21",
+    "y_true": 7.659,
+    "pred": 3.743000030517578,
+    "2d__hgb": 5.585000038146973,
+    "abs_err": 3.915,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_43241",
+    "smiles": "OC[CH-]C1=C[C@H]2[CH+][NH2+][C@@H]12",
+    "y_true": 2.682,
+    "pred": 6.538000106811523,
+    "2d__hgb": 4.51800012588501,
+    "abs_err": 3.855,
+    "comp_nheavy": 9.0
+   },
+   {
+    "mol_id": "gdb_130383",
+    "smiles": "N/C=[NH+]/c1nocc1O",
+    "y_true": 9.435,
+    "pred": 5.636000156402588,
+    "2d__hgb": 7.741000175476074,
+    "abs_err": 3.799,
+    "comp_nheavy": 9.0
+   }
+  ],
+  "near_zero": {
+   "n": 179,
+   "mae": 0.14886283422864602,
+   "mean_pred": 0.19272063672542572
+  },
+  "resid_true_corr": -0.40264642860866384,
+  "frac_within_0_5D": 0.7832840797150867,
+  "frac_within_1D": 0.936424945063272,
+  "median_abs_err": 0.21032699909210195
+ },
+ "learning_curve": [
+  {
+   "featureset": "2d",
+   "n_train": 1000,
+   "test_mae": 0.7956767432787026,
+   "train_mae": 0.43382687860192315
+  },
+  {
+   "featureset": "2d",
+   "n_train": 2000,
+   "test_mae": 0.7430095591328144,
+   "train_mae": 0.2544124716812734
+  },
+  {
+   "featureset": "2d",
+   "n_train": 5000,
+   "test_mae": 0.6946757549686057,
+   "train_mae": 0.16843100564354346
+  },
+  {
+   "featureset": "2d",
+   "n_train": 10000,
+   "test_mae": 0.6596321996404265,
+   "train_mae": 0.37572722024511623
+  },
+  {
+   "featureset": "2d",
+   "n_train": 20000,
+   "test_mae": 0.6208859897332577,
+   "train_mae": 0.33515666175608416
+  },
+  {
+   "featureset": "2d",
+   "n_train": 50000,
+   "test_mae": 0.5730426802378777,
+   "train_mae": 0.3323930593149092
+  },
+  {
+   "featureset": "2d",
+   "n_train": 105576,
+   "test_mae": 0.5412056277510434,
+   "train_mae": 0.37002371300281844
+  },
+  {
+   "featureset": "full",
+   "n_train": 1000,
+   "test_mae": 0.5862551627276179,
+   "train_mae": 0.24016685372132798
+  },
+  {
+   "featureset": "full",
+   "n_train": 2000,
+   "test_mae": 0.5435627194811177,
+   "train_mae": 0.08925940257412215
+  },
+  {
+   "featureset": "full",
+   "n_train": 5000,
+   "test_mae": 0.5001409761788954,
+   "train_mae": 0.19282319506440154
+  },
+  {
+   "featureset": "full",
+   "n_train": 10000,
+   "test_mae": 0.4521553332455122,
+   "train_mae": 0.08981859260463913
+  },
+  {
+   "featureset": "full",
+   "n_train": 20000,
+   "test_mae": 0.41829443176966047,
+   "train_mae": 0.15688918707653884
+  },
+  {
+   "featureset": "full",
+   "n_train": 50000,
+   "test_mae": 0.36775445080275804,
+   "train_mae": 0.16107114321466556
+  },
+  {
+   "featureset": "full",
+   "n_train": 105576,
+   "test_mae": 0.3419698027915999,
+   "train_mae": 0.2138531400890721
+  }
+ ],
+ "group_importance": [
+  {
+   "group": "comp",
+   "label": "Composition",
+   "n_features": 7,
+   "base_mae": 0.3419698027915999,
+   "delta_mae_mean": 0.019284456863584265,
+   "delta_mae_std": 0.0002791256021760703
+  },
+  {
+   "group": "d2",
+   "label": "2D descriptors",
+   "n_features": 208,
+   "base_mae": 0.3419698027915999,
+   "delta_mae_mean": 0.8336357348330189,
+   "delta_mae_std": 0.0032150245907521116
+  },
+  {
+   "group": "q2",
+   "label": "Gasteiger charge stats",
+   "n_features": 4,
+   "base_mae": 0.3419698027915999,
+   "delta_mae_mean": 0.025464989937490135,
+   "delta_mae_std": 0.00039487239419646713
+  },
+  {
+   "group": "geo",
+   "label": "Coulomb eigenvalues + shape",
+   "n_features": 35,
+   "base_mae": 0.3419698027915999,
+   "delta_mae_mean": 0.0733684063639804,
+   "delta_mae_std": 0.0005089127234909138
+  },
+  {
+   "group": "phys",
+   "label": "Dipole estimates (charges x coords)",
+   "n_features": 2,
+   "base_mae": 0.3419698027915999,
+   "delta_mae_mean": 0.6620163628538354,
+   "delta_mae_std": 0.002690017823366717
+  }
+ ],
+ "mu_histogram": [
+  3091,
+  2152,
+  2505,
+  4517,
+  6971,
+  10219,
+  10611,
+  9637,
+  8285,
+  7803,
+  7965,
+  7876,
+  7060,
+  6737,
+  6114,
+  5729,
+  5087,
+  4255,
+  3183,
+  2819,
+  2276,
+  1806,
+  1231,
+  1044,
+  727,
+  506,
+  434,
+  296,
+  199,
+  150,
+  113,
+  79,
+  57,
+  43,
+  28,
+  35,
+  20,
+  17,
+  7,
+  6,
+  16,
+  11,
+  9,
+  9,
+  10,
+  6,
+  9,
+  18,
+  10,
+  8,
+  11,
+  10,
+  15,
+  7,
+  11,
+  9,
+  10,
+  9,
+  12,
+  11,
+  7,
+  4,
+  4,
+  8,
+  4,
+  3,
+  7,
+  3,
+  0,
+  0,
+  3,
+  1,
+  2,
+  4,
+  3,
+  0,
+  3,
+  0,
+  2,
+  0,
+  1,
+  1,
+  0,
+  2,
+  0,
+  0,
+  1,
+  2,
+  0,
+  0,
+  1,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  0,
+  1,
+  0,
+  0
+ ],
+ "model_labels": {
+  "mean": "Mean baseline",
+  "linreg_comp": "Linear reg. on atom counts",
+  "ridge": "Ridge",
+  "lasso": "Lasso",
+  "knn": "k-NN",
+  "tree": "Decision tree",
+  "rf": "Random forest",
+  "hgb": "Gradient boosting",
+  "svr": "SVR (RBF)",
+  "mlp": "MLP (neural net)"
+ },
+ "featureset_labels": {
+  "composition": "Composition (atom counts)",
+  "2d": "Structure only (2D graph)",
+  "2d_phys": "2D + dipole estimates",
+  "2d_geo": "2D + Coulomb/shape geometry",
+  "full": "Structure + geometry (full)"
+ }
+}

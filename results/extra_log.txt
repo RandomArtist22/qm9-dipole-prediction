@@ -1,0 +1,19 @@
+{'featureset': '2d', 'n_train': 1000, 'test_mae': 0.7956767432787026, 'train_mae': 0.43382687860192315}
+{'featureset': '2d', 'n_train': 2000, 'test_mae': 0.7430095591328144, 'train_mae': 0.2544124716812734}
+{'featureset': '2d', 'n_train': 5000, 'test_mae': 0.6946757549686057, 'train_mae': 0.16843100564354346}
+{'featureset': '2d', 'n_train': 10000, 'test_mae': 0.6596321996404265, 'train_mae': 0.37572722024511623}
+{'featureset': '2d', 'n_train': 20000, 'test_mae': 0.6208859897332577, 'train_mae': 0.33515666175608416}
+{'featureset': '2d', 'n_train': 50000, 'test_mae': 0.5730426802378777, 'train_mae': 0.3323930593149092}
+{'featureset': '2d', 'n_train': 105576, 'test_mae': 0.5412056277510434, 'train_mae': 0.37002371300281844}
+{'featureset': 'full', 'n_train': 1000, 'test_mae': 0.5862551627276179, 'train_mae': 0.24016685372132798}
+{'featureset': 'full', 'n_train': 2000, 'test_mae': 0.5435627194811177, 'train_mae': 0.08925940257412215}
+{'featureset': 'full', 'n_train': 5000, 'test_mae': 0.5001409761788954, 'train_mae': 0.19282319506440154}
+{'featureset': 'full', 'n_train': 10000, 'test_mae': 0.4521553332455122, 'train_mae': 0.08981859260463913}
+{'featureset': 'full', 'n_train': 20000, 'test_mae': 0.41829443176966047, 'train_mae': 0.15688918707653884}
+{'featureset': 'full', 'n_train': 50000, 'test_mae': 0.36775445080275804, 'train_mae': 0.16107114321466556}
+{'featureset': 'full', 'n_train': 105576, 'test_mae': 0.3419698027915999, 'train_mae': 0.2138531400890721}
+{'group': 'comp', 'label': 'Composition', 'n_features': 7, 'base_mae': 0.3419698027915999, 'delta_mae_mean': 0.019284456863584265, 'delta_mae_std': 0.0002791256021760703}
+{'group': 'd2', 'label': '2D descriptors', 'n_features': 208, 'base_mae': 0.3419698027915999, 'delta_mae_mean': 0.8336357348330189, 'delta_mae_std': 0.0032150245907521116}
+{'group': 'q2', 'label': 'Gasteiger charge stats', 'n_features': 4, 'base_mae': 0.3419698027915999, 'delta_mae_mean': 0.025464989937490135, 'delta_mae_std': 0.00039487239419646713}
+{'group': 'geo', 'label': 'Coulomb eigenvalues + shape', 'n_features': 35, 'base_mae': 0.3419698027915999, 'delta_mae_mean': 0.0733684063639804, 'delta_mae_std': 0.0005089127234909138}
+{'group': 'phys', 'label': 'Dipole estimates (charges x coords)', 'n_features': 2, 'base_mae': 0.3419698027915999, 'delta_mae_mean': 0.6620163628538354, 'delta_mae_std': 0.002690017823366717}
