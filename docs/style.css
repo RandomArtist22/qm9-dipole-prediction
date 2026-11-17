@@ -337,3 +337,21 @@ footer { color: var(--muted); font-size: 13px; text-align: center; padding: 30px
 .sb-nf3[hidden] { display: none; }
 .sb-cap { margin: 0; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
 @media (max-width: 520px) { .sandbox-card { padding: 14px; } .sb-read { font-size: 15px; } }
+
+/* ---------- stepper ---------- */
+.stepper { margin: 10px 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.st-steps { display: flex; flex-wrap: wrap; gap: 6px; }
+.st-steps button { font: inherit; font-size: 13px; padding: 5px 11px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); cursor: pointer; }
+.st-steps button.on { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.st-steps .st-play { margin-left: auto; color: var(--ink); }
+.st-line { position: relative; height: 62px; margin: 8px 28px 4px; }
+.st-axis { position: absolute; left: 0; right: 0; top: 38px; height: 2px; background: var(--line); border-radius: 2px; }
+.st-tick { position: absolute; top: 28px; width: 2px; height: 22px; background: var(--ink); transform: translateX(-1px); }
+.st-lab { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); font-size: 11.5px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.st-dot { position: absolute; top: 34px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--accent); opacity: 0; }
+.st-dot.vis { opacity: .3; }
+.st-mark { position: absolute; top: 33px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--accent); transition: left .5s; }
+.st-pill { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--surface); font-size: 12.5px; font-weight: 700; padding: 1px 8px; border-radius: 99px; font-variant-numeric: tabular-nums; }
+.st-err { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.st-cap { font-size: 12px; margin-top: 2px; }
+@media (prefers-reduced-motion: reduce) { .st-mark { transition: none; } }

@@ -361,8 +361,51 @@
     } catch (e) { console.warn("2D drawing failed", e); }
   }
 
+  // ---------------- feature-by-feature stepper ----------------
+  const STEPS = [["Atom counts", "composition__hgb"], ["+ 2D graph", "2d__hgb"], ["+ 3D shape", "2d_geo__hgb"], ["+ dipole estimates", "full__hgb"]];
+  let stepIdx = 3, stepMol = null, stepTimer = null, stepM = null;
+  function stopStepper() { if (stepTimer) { clearInterval(stepTimer); stepTimer = null; } }
+  function renderStepper(m) {
+    const host = $("#lab-stepper"); if (!host) return;
+    stepM = m;
+    const vals = STEPS.map(([, k]) => m.p[k]);
+    const lo = Math.min(0, ...vals), hi = Math.max(...vals, m.y) * 1.1, span = hi - lo || 1;
+    const pos = (v) => Math.min(100, Math.max(0, (v - lo) / span * 100));
+    if (host.dataset.id !== m.id || !host.firstChild) {
+      host.dataset.id = m.id;
+      host.innerHTML = `
+        <div class="st-steps">${STEPS.map((s, i) => `<button type="button" data-i="${i}">${s[0]}</button>`).join("")}<button type="button" class="st-play" aria-label="Play steps">&#9654;</button></div>
+        <div class="st-line"><div class="st-axis"></div>
+          <span class="st-tick" style="left:${pos(m.y)}%"><span class="st-lab">true ${f(m.y, 2)}</span></span>
+          ${vals.map((v, i) => `<span class="st-dot" data-i="${i}" style="left:${pos(v)}%"></span>`).join("")}
+          <span class="st-mark"><span class="st-pill"></span></span></div>
+        <div class="st-err"></div>
+        <div class="st-cap muted">Always gradient boosting, whatever the model selector says.</div>`;
+      $$(".st-steps button[data-i]", host).forEach((b) => b.addEventListener("click", () => { stopStepper(); stepIdx = +b.dataset.i; renderStepper(stepM); }));
+      $(".st-play", host).addEventListener("click", playStepper);
+    }
+    const pred = vals[stepIdx], err = Math.abs(pred - m.y);
+    $$(".st-steps button[data-i]", host).forEach((b) => { const on = +b.dataset.i === stepIdx; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
+    $$(".st-dot", host).forEach((d) => d.classList.toggle("vis", +d.dataset.i < stepIdx));
+    const mk = $(".st-mark", host); mk.style.left = pos(pred) + "%"; $(".st-pill", host).textContent = f(pred, 2);
+    const e = $(".st-err", host);
+    e.style.color = err < 0.5 ? css("--good") : err > 1.5 ? css("--bad") : css("--c2d");
+    e.textContent = `error: |${f(pred, 2)} − ${f(m.y, 2)}| = ${f(err, 2)} D`;
+  }
+  function playStepper() {
+    stopStepper();
+    if (!stepM) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { stepIdx = 3; renderStepper(stepM); return; }
+    stepIdx = 0; renderStepper(stepM);
+    stepTimer = setInterval(() => {
+      if (stepIdx >= 3) { stopStepper(); return; }
+      stepIdx++; renderStepper(stepM);
+    }, 900);
+  }
+
   function showMol(id, story) {
     const m = EX.molecules.find((q) => q.id === id); if (!m) return;
+    if (stepMol !== id) { stopStepper(); stepIdx = 3; stepMol = id; }
     if (story !== undefined) currentStory = story;
     $("#lab-title").innerHTML = `${m.id} <span class="pill">${m.h} heavy atoms</span> <span class="pill">${m.ring ? "ring" : "acyclic"}</span>`;
     if (!labViewer) labViewer = makeViewer($("#lab-3d"));
@@ -388,9 +431,12 @@
         <div><div class="k">GB prediction</div><div class="v" style="color:${Math.abs(pred - m.y) < 0.5 ? css("--good") : css("--bad")}">${f(pred, 2)}</div></div>
         <div><div class="k">charge×position est.</div><div class="v">${typeof est === "number" ? f(est, 2) : "–"}</div></div>
       </div>
+      <div id="lab-stepper" class="stepper"></div>
       <div style="margin:2px 0 6px"><code>${m.s}</code></div>
-      <div class="muted" style="font-size:12.5px;margin-bottom:4px">All models (${exFS === "full" ? "+ geometry" : "structure only"}), in Debye. Black tick = true value.</div>
-      <div class="predbars">${bars}</div>`;
+      <details class="more"><summary>Compare all models</summary><div class="more-body">
+        <div class="muted" style="font-size:12.5px;margin-bottom:4px">All models (${exFS === "full" ? "+ geometry" : "structure only"}), in Debye. Black tick = true value.</div>
+        <div class="predbars">${bars}</div></div></details>`;
+    renderStepper(m);
   }
   let rendered3d = null;
   function setLabMode(mode) {
