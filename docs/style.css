@@ -314,7 +314,7 @@ footer { color: var(--muted); font-size: 13px; text-align: center; padding: 30px
 .sb-chip { font: inherit; font-size: 14px; font-weight: 600; padding: 6px 14px; border-radius: 99px; cursor: pointer;
   border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); }
 .sb-chip:hover { border-color: var(--accent); color: var(--accent); }
-.sb-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sb-chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
 .sb-svg { width: 100%; height: auto; display: block; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; }
 .sb-svg text { font-family: inherit; text-anchor: middle; }
 .sb-bond { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
