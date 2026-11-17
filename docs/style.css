@@ -355,3 +355,7 @@ footer { color: var(--muted); font-size: 13px; text-align: center; padding: 30px
 .st-err { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
 .st-cap { font-size: 12px; margin-top: 2px; }
 @media (prefers-reduced-motion: reduce) { .st-mark { transition: none; } }
+
+/* ---------- explorer play ---------- */
+.ex-play { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 99px; border: 1px solid var(--accent); background: var(--accent); color: var(--surface); cursor: pointer; }
+.ex-play:disabled { background: var(--surface-2); border-color: var(--line); color: var(--muted); cursor: not-allowed; }

@@ -255,10 +255,37 @@
     pref.filter((m) => models.includes(m)).forEach((m) => {
       const o = document.createElement("option"); o.value = m; o.textContent = ML()[m]; sel.appendChild(o);
     });
-    ["#ex-model", "#ex-heavy", "#ex-ring", "#ex-lo", "#ex-hi"].forEach((id) => $(id).addEventListener("input", drawExplorer));
+    ["#ex-model", "#ex-heavy", "#ex-ring", "#ex-lo", "#ex-hi"].forEach((id) => $(id).addEventListener("input", () => { cancelCloud(); drawExplorer(); }));
+    $("#ex-play").addEventListener("click", animateCloud);
     $$("#ex-fs button").forEach((b) => b.addEventListener("click", () => {
+      cancelCloud();
       $$("#ex-fs button").forEach((x) => x.classList.toggle("on", x === b)); exFS = b.dataset.f; drawExplorer(); if (selected) showMol(selected);
     }));
+  }
+  let cloudRAF = null;
+  function cancelCloud() { if (cloudRAF !== null) { cancelAnimationFrame(cloudRAF); cloudRAF = null; } }
+  function setFS(v) { exFS = v; $$("#ex-fs button").forEach((x) => x.classList.toggle("on", x.dataset.f === v)); }
+  function animateCloud() {
+    const model = $("#ex-model").value;
+    if (model === "mean" || model === "linreg_comp") return;
+    cancelCloud();
+    setFS("2d"); drawExplorer(); if (selected) showMol(selected);
+    const finish = () => { cloudRAF = null; setFS("full"); drawExplorer(); if (selected) showMol(selected); };
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+    const mols = exFiltered(), n = mols.length;
+    if (!n) { finish(); return; }
+    const a = mols.map((m) => m.p["2d__" + model]), b = mols.map((m) => m.p["full__" + model]);
+    const T = 1500, t0 = performance.now();
+    const maeEl = () => { const s = $("#ex-stats").children[1]; return s && s.querySelector("b"); };
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / T), e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+      const ys = a.map((v, i) => v + (b[i] - v) * e);
+      const err = ys.map((v, i) => Math.abs(v - mols[i].y));
+      Plotly.restyle("plot-explorer", { y: [ys], "marker.color": [err] }, [0]);
+      const el = maeEl(); if (el) el.textContent = f(err.reduce((s, v) => s + v, 0) / n);
+      if (u < 1) cloudRAF = requestAnimationFrame(step); else finish();
+    };
+    cloudRAF = requestAnimationFrame(step);
   }
   function exFiltered() {
     const hv = $("#ex-heavy").value, rg = $("#ex-ring").value;
@@ -268,6 +295,8 @@
   }
   function drawExplorer() {
     const model = $("#ex-model").value, key = exKey(model), mols = exFiltered();
+    const pb = $("#ex-play"), noGeo = model === "mean" || model === "linreg_comp";
+    pb.disabled = noGeo; pb.title = noGeo ? "This model uses composition only, so geometry changes nothing." : "";
     const xs = mols.map((m) => m.y), ys = mols.map((m) => m.p[key]);
     const err = mols.map((m) => Math.abs(m.p[key] - m.y));
     const n = mols.length, mae = n ? err.reduce((a, b) => a + b, 0) / n : NaN;
@@ -292,7 +321,7 @@
       xaxis: { title: "true μ (D)", range: [0, mx * 1.03], gridcolor: css("--line") }, yaxis: { title: `predicted μ (D) · ${ML()[model]}`, range: [0, mx * 1.03], gridcolor: css("--line") } }), CFG);
     const el = $("#plot-explorer");
     if (!el._bound) {
-      el.on("plotly_click", (ev) => { const p = ev.points[0]; if (p && p.customdata) { selected = p.customdata; $$("#demo-chips button").forEach((x) => x.classList.toggle("on", x.dataset.id === selected)); const chip = $$("#demo-chips button").find((x) => x.dataset.id === selected); showMol(selected, chip ? chip.dataset.story : null); drawExplorer(); } });
+      el.on("plotly_click", (ev) => { const p = ev.points[0]; if (p && p.customdata) { cancelCloud(); selected = p.customdata; $$("#demo-chips button").forEach((x) => x.classList.toggle("on", x.dataset.id === selected)); const chip = $$("#demo-chips button").find((x) => x.dataset.id === selected); showMol(selected, chip ? chip.dataset.story : null); drawExplorer(); } });
       el._bound = true;
     }
   }
