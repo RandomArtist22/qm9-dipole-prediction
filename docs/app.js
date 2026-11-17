@@ -418,7 +418,7 @@
     $$(".st-dot", host).forEach((d) => d.classList.toggle("vis", +d.dataset.i < stepIdx));
     const mk = $(".st-mark", host); mk.style.left = pos(pred) + "%"; $(".st-pill", host).textContent = f(pred, 2);
     const e = $(".st-err", host);
-    e.style.color = err < 0.5 ? css("--good") : err > 1.5 ? css("--bad") : css("--c2d");
+    e.style.color = err < 0.5 ? css("--good-text") : err > 1.5 ? css("--bad-text") : css("--warn-text");
     e.textContent = `error: |${f(pred, 2)} − ${f(m.y, 2)}| = ${f(err, 2)} D`;
   }
   function playStepper() {
