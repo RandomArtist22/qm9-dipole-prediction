@@ -48,7 +48,7 @@
   // Plotly sizes charts to their container; a chart revealed later (details/tab) needs a resize
   document.addEventListener("toggle", (e) => {
     if (e.target.matches && e.target.matches("details") && e.target.open)
-      $$(".js-plotly-plot", e.target).forEach((p) => Plotly.Plots.resize(p));
+      window.Plotly && $$(".js-plotly-plot", e.target).forEach((p) => Plotly.Plots.resize(p));
   }, true);
 
   function baseLayout(extra = {}) {
@@ -64,12 +64,11 @@
   const CFG = { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
   // A fixed layout.height does not size the (overflow:hidden) .plot box, so legends and axis titles
   // below the min-height were clipped. Grow the box to fit whatever height the chart asked for.
-  const plotlyReact = Plotly.react;
-  Plotly.react = function (gd, data, layout, config) {
+  function plotReact(gd, data, layout, config) {
     const el = typeof gd === "string" ? document.getElementById(gd) : gd;
     if (el && layout && layout.height) el.style.minHeight = Math.max(layout.height + 2, parseFloat(el.style.minHeight) || 0) + "px";
-    return plotlyReact.apply(this, arguments);
-  };
+    if (window.Plotly) return Plotly.react(gd, data, layout, config);
+  }
   const ML = () => S.model_labels;
 
   function row(model, fs) {
@@ -100,7 +99,7 @@
   // ---------------- histogram ----------------
   function drawHist() {
     const h = S.mu_histogram, x = h.map((_, i) => i * 0.25 + 0.125);
-    Plotly.react("plot-hist", [{ type: "bar", x, y: h, marker: { color: css("--accent") }, hovertemplate: "μ ≈ %{x:.2f} D<br>%{y} molecules<extra></extra>" }],
+    plotReact("plot-hist", [{ type: "bar", x, y: h, marker: { color: css("--accent") }, hovertemplate: "μ ≈ %{x:.2f} D<br>%{y} molecules<extra></extra>" }],
       baseLayout({ xaxis: { title: "dipole moment μ (Debye)", gridcolor: css("--line") }, yaxis: { title: "molecules", type: "log", gridcolor: css("--line") }, bargap: 0, height: 300 }), CFG);
   }
 
@@ -132,7 +131,7 @@
     mk("2d", "structure only (2D)", css("--c2d"));
     mk("full", "structure + geometry", css("--cfull"));
     const t = { mae: "test MAE (D), lower is better", rmse: "test RMSE (D), lower is better", r2: "test R², higher is better" }[metric];
-    Plotly.react("plot-models", tr, baseLayout({ barmode: "group", height: 420, showlegend: false, margin: { l: 10, r: 16, t: 10, b: 50 },
+    plotReact("plot-models", tr, baseLayout({ barmode: "group", height: 420, showlegend: false, margin: { l: 10, r: 16, t: 10, b: 50 },
       xaxis: { title: t, gridcolor: css("--line") }, yaxis: { categoryorder: "array", categoryarray: lab, gridcolor: css("--line"), automargin: true } }), CFG);
   }
   $$("#metric-seg button").forEach((b) => b.addEventListener("click", () => {
@@ -167,10 +166,10 @@
       return { type: "bar", name: ML()[m], x: order.map((fs) => short[fs]), customdata: order.map((fs) => S.featureset_labels[fs]), y: pts.map((p) => (p ? p.test_mae : null)),
         marker: { color: i ? css("--cfull") : css("--c2d") }, hovertemplate: "%{customdata}<br>MAE %{y:.3f}<extra>" + ML()[m] + "</extra>" };
     });
-    Plotly.react("plot-ablation", tr, baseLayout({ barmode: "group", height: 340, margin: { l: 55, r: 10, t: 10, b: 60 },
+    plotReact("plot-ablation", tr, baseLayout({ barmode: "group", height: 340, margin: { l: 55, r: 10, t: 10, b: 60 },
       yaxis: { title: "test MAE (D)", gridcolor: css("--line") }, xaxis: { tickangle: 0, automargin: true }, legend: { orientation: "h", y: 1.12 } }), CFG);
     const gi = S.group_importance.slice().sort((a, b) => a.delta_mae_mean - b.delta_mae_mean);
-    Plotly.react("plot-importance", [{ type: "bar", orientation: "h", y: gi.map((g) => g.label), x: gi.map((g) => g.delta_mae_mean),
+    plotReact("plot-importance", [{ type: "bar", orientation: "h", y: gi.map((g) => g.label), x: gi.map((g) => g.delta_mae_mean),
       error_x: { type: "data", array: gi.map((g) => g.delta_mae_std), color: css("--muted") }, marker: { color: css("--cfull") },
       hovertemplate: "%{y}<br>MAE rises by %{x:.3f} D<extra></extra>" }],
       baseLayout({ height: 340, margin: { l: 10, r: 10, t: 10, b: 50 }, yaxis: { automargin: true }, xaxis: { title: "Δ MAE (D)", gridcolor: css("--line") } }), CFG);
@@ -183,7 +182,7 @@
       tr.push({ x: d.map((r) => r.n_train), y: d.map((r) => r.test_mae), mode: "lines+markers", name: S.featureset_labels[fs] + " · test", line: { color: c } });
       tr.push({ x: d.map((r) => r.n_train), y: d.map((r) => r.train_mae), mode: "lines+markers", name: "train", line: { color: c, dash: "dot" }, opacity: 0.6 });
     });
-    Plotly.react("plot-lc", tr, baseLayout({ height: 330, xaxis: { type: "log", title: "training molecules", gridcolor: css("--line") }, yaxis: { title: "MAE (D)", gridcolor: css("--line") } }), CFG);
+    plotReact("plot-lc", tr, baseLayout({ height: 330, xaxis: { type: "log", title: "training molecules", gridcolor: css("--line") }, yaxis: { title: "MAE (D)", gridcolor: css("--line") } }), CFG);
   }
 
   function tableTests() {
@@ -197,7 +196,7 @@
   // ---------------- error analysis ----------------
   function drawBins() {
     const b = S.error_analysis.by_mu_bin, x = b.map((r) => `${r.mu_bin} D<br>n=${r.n}`);
-    Plotly.react("plot-bins", [
+    plotReact("plot-bins", [
       { type: "bar", name: "mean baseline", x, y: b.map((r) => r.mae_mean_baseline), marker: { color: css("--cbase") } },
       { type: "bar", name: "GB structure only", x, y: b.map((r) => r.mae_2d), marker: { color: css("--c2d") } },
       { type: "bar", name: "GB + geometry", x, y: b.map((r) => r.mae), marker: { color: css("--cfull") } },
@@ -236,7 +235,7 @@
       // keep the default view readable: the four series that carry the story; the rest are one legend click away
       visible: (r.model === "mean" || (r.model === "ridge" && r.featureset === "full") || r.model === "hgb") ? true : "legendonly",
       hovertemplate: "%{x}<br>MAE %{y:.3f}<extra>%{fullData.name}</extra>" }));
-    Plotly.react("plot-robust", tr, baseLayout({ barmode: "group", height: 420, yaxis: { title: "test MAE (D)", gridcolor: css("--line") },
+    plotReact("plot-robust", tr, baseLayout({ barmode: "group", height: 420, yaxis: { title: "test MAE (D)", gridcolor: css("--line") },
       xaxis: { automargin: true }, margin: { l: 60, r: 10, t: 10, b: 40 }, legend: { orientation: "h", y: -0.18, title: { text: "click to show/hide: " } } }), CFG);
     let h = `<thead><tr><th>Model</th><th>Features</th><th class="n">random (all)</th><th class="n">random ring-only</th><th class="n">scaffold</th><th class="n">scaffold vs ring-only</th><th class="n">size control</th><th class="n">≤8 → 9</th><th class="n">size vs control</th></tr></thead><tbody>`;
     rr.forEach((r) => {
@@ -277,6 +276,7 @@
     const model = $("#ex-model").value;
     if (model === "mean" || model === "linreg_comp") return;
     cancelCloud();
+    if (!window.Plotly) return;
     setFS("2d"); drawExplorer(); if (selected) showMol(selected);
     const finish = () => { cloudRAF = null; setFS("full"); drawExplorer(); if (selected) showMol(selected); };
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
@@ -304,7 +304,7 @@
   function drawExplorer() {
     const model = $("#ex-model").value, key = exKey(model), mols = exFiltered();
     const pb = $("#ex-play"), noGeo = model === "mean" || model === "linreg_comp";
-    pb.disabled = noGeo; pb.title = noGeo ? "This model uses composition only, so geometry changes nothing." : "";
+    pb.disabled = noGeo || !window.Plotly; pb.title = !window.Plotly ? "Charts failed to load" : noGeo ? "This model uses composition only, so geometry changes nothing." : "";
     const xs = mols.map((m) => m.y), ys = mols.map((m) => m.p[key]);
     const err = mols.map((m) => Math.abs(m.p[key] - m.y));
     const n = mols.length, mae = n ? err.reduce((a, b) => a + b, 0) / n : NaN;
@@ -325,10 +325,10 @@
       const m = EX.molecules.find((q) => q.id === selected);
       if (m) tr.push({ x: [m.y], y: [m.p[key]], mode: "markers", marker: { size: 14, color: "rgba(0,0,0,0)", line: { color: css("--bad"), width: 2.5 } }, hoverinfo: "skip", showlegend: false });
     }
-    Plotly.react("plot-explorer", tr, baseLayout({ height: 440, showlegend: false, margin: { l: 55, r: 10, t: 10, b: 50 },
+    plotReact("plot-explorer", tr, baseLayout({ height: 440, showlegend: false, margin: { l: 55, r: 10, t: 10, b: 50 },
       xaxis: { title: "true μ (D)", range: [0, mx * 1.03], gridcolor: css("--line") }, yaxis: { title: `predicted μ (D) · ${ML()[model]}`, range: [0, mx * 1.03], gridcolor: css("--line") } }), CFG);
     const el = $("#plot-explorer");
-    if (!el._bound) {
+    if (window.Plotly && !el._bound) {
       el.on("plotly_click", (ev) => { const p = ev.points[0]; if (p && p.customdata) { cancelCloud(); selected = p.customdata; $$("#demo-chips button").forEach((x) => x.classList.toggle("on", x.dataset.id === selected)); const chip = $$("#demo-chips button").find((x) => x.dataset.id === selected); showMol(selected, chip ? chip.dataset.story : null); drawExplorer(); } });
       el._bound = true;
     }
@@ -400,19 +400,20 @@
 
   // ---------------- feature-by-feature stepper ----------------
   const STEPS = [["Atom counts", "composition__hgb"], ["+ 2D graph", "2d__hgb"], ["+ 3D shape", "2d_geo__hgb"], ["+ dipole estimates", "full__hgb"]];
-  let stepIdx = 3, stepMol = null, stepTimer = null, stepM = null;
+  let stepIdx = 3, stepMol = null, stepFS = null, stepTimer = null, stepM = null;
   function stopStepper() { if (stepTimer) { clearInterval(stepTimer); stepTimer = null; } }
   function renderStepper(m) {
     const host = $("#lab-stepper"); if (!host) return;
     stepM = m;
     const vals = STEPS.map(([, k]) => m.p[k]);
-    const lo = Math.min(0, ...vals), hi = Math.max(...vals, m.y) * 1.1, span = hi - lo || 1;
+    const lo = Math.min(0, ...vals), hi = Math.max(Math.max(...vals, m.y) * 1.1, lo + 2), span = hi - lo || 1;
     const pos = (v) => Math.min(100, Math.max(0, (v - lo) / span * 100));
     if (host.dataset.id !== m.id || !host.firstChild) {
       host.dataset.id = m.id;
       host.innerHTML = `
         <div class="st-steps">${STEPS.map((s, i) => `<button type="button" data-i="${i}">${s[0]}</button>`).join("")}<button type="button" class="st-play" aria-label="Play steps">&#9654;</button></div>
         <div class="st-line"><div class="st-axis"></div>
+          <span class="st-end" style="left:0">${lo > -0.05 ? "0" : f(lo, 1)} D</span><span class="st-end r" style="left:100%">${f(hi, 1)} D</span>
           <span class="st-tick" style="left:${pos(m.y)}%"><span class="st-lab">true ${f(m.y, 2)}</span></span>
           ${vals.map((v, i) => `<span class="st-dot" data-i="${i}" style="left:${pos(v)}%"></span>`).join("")}
           <span class="st-mark"><span class="st-pill"></span></span></div>
@@ -443,7 +444,8 @@
 
   function showMol(id, story) {
     const m = EX.molecules.find((q) => q.id === id); if (!m) return;
-    if (stepMol !== id) { stopStepper(); stepIdx = 3; stepMol = id; }
+    const wasOpen = stepMol === id && $("#lab-body details.more")?.open; // new molecule -> collapsed
+    if (stepMol !== id || stepFS !== exFS) { stopStepper(); stepIdx = exFS === "2d" ? 1 : 3; stepMol = id; stepFS = exFS; }
     if (story !== undefined) currentStory = story;
     $("#lab-title").innerHTML = `${m.id} <span class="pill">${m.h} heavy atoms</span> <span class="pill">${m.ring ? "ring" : "acyclic"}</span>`;
     if (!labViewer) labViewer = makeViewer($("#lab-3d"));
@@ -471,7 +473,7 @@
       </div>
       <div id="lab-stepper" class="stepper"></div>
       <div style="margin:2px 0 6px"><code>${m.s}</code></div>
-      <details class="more"><summary>Compare all models</summary><div class="more-body">
+      <details class="more"${wasOpen ? " open" : ""}><summary>Compare all models</summary><div class="more-body">
         <div class="muted" style="font-size:12.5px;margin-bottom:4px">All models (${exFS === "full" ? "+ geometry" : "structure only"}), in Debye. Black tick = true value.</div>
         <div class="predbars">${bars}</div></div></details>`;
     renderStepper(m);
