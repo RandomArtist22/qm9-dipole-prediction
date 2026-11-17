@@ -62,6 +62,14 @@
     }, extra);
   }
   const CFG = { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
+  // A fixed layout.height does not size the (overflow:hidden) .plot box, so legends and axis titles
+  // below the min-height were clipped. Grow the box to fit whatever height the chart asked for.
+  const plotlyReact = Plotly.react;
+  Plotly.react = function (gd, data, layout, config) {
+    const el = typeof gd === "string" ? document.getElementById(gd) : gd;
+    if (el && layout && layout.height) el.style.minHeight = Math.max(layout.height + 2, parseFloat(el.style.minHeight) || 0) + "px";
+    return plotlyReact.apply(this, arguments);
+  };
   const ML = () => S.model_labels;
 
   function row(model, fs) {
