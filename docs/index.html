@@ -8,323 +8,381 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2210%22 cy=%2216%22 r=%227%22 fill=%22%232f5bd3%22/%3E%3Ccircle cx=%2223%22 cy=%2216%22 r=%225%22 fill=%22%23d99a06%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=9">
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.1.7/dist/smiles-drawer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js"></script>
 </head>
 <body>
 <nav class="top"><div class="inner" id="nav">
-  <a href="#question">Question</a><a href="#data">Data</a><a href="#preprocessing">Preprocessing</a>
-  <a href="#methods">Methods</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a>
-  <a href="#explorer">Explore</a><a href="#errors">Errors</a><a href="#robustness">Robustness</a>
-  <a href="#limitations">Limitations</a><a href="#conclusion">Conclusion</a><a href="#reproduce">Reproduce</a>
+  <a class="brand" href="#top">μ<span>QM9</span></a>
+  <a href="#why">Why</a><a href="#question">Question</a><a href="#data">Data</a><a href="#method">Method</a><a href="#results">Results</a>
+  <a href="#explorer">Explore 3D</a><a href="#errors">Errors</a><a href="#robustness">Robustness</a><a href="#conclusion">Conclusion</a>
   <button class="theme-toggle" id="theme" aria-label="Toggle colour theme" title="Light / dark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
 </div></nav>
 
-<header class="hero">
+<header class="hero" id="top">
   <div class="hero-inner">
     <div class="hero-text">
       <div class="kicker">ES 335 · Machine Learning · Course project</div>
       <h1>Can a molecule's <span class="grad">dipole moment</span> be predicted from its structure alone?</h1>
-      <p class="lede">We predict the DFT-computed dipole moment of <b>131,970</b> small organic molecules (QM9) without running the
-        property calculation. We compare simple baselines with eight learned models, measure what 3D geometry adds to the
-        2D bond graph, and test whether the models still work on unseen ring systems and on larger molecules.</p>
+      <p class="lede">We learn the DFT dipole moment of <b>131,970</b> small molecules from their structure, compare ten models,
+        and test what 3D geometry adds and where the models break.</p>
       <div class="cta">
         <a class="btn primary" href="#explorer">Explore the molecules in 3D →</a>
-        <a class="btn ghost" href="#question">Read the reasoning</a>
+        <a class="btn ghost" href="#why">Why this project?</a>
       </div>
       <div class="byline">P Sai Ramcharan Reddy (25110220) · Vasu Garg (25110342) ·
-        <a id="repo-link" href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source repository</a></div>
+        <a id="repo-link" href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source on GitHub</a></div>
     </div>
     <figure class="hero-mol">
       <div id="hero-viewer" class="mol3d" role="img" aria-label="Rotating 3D model of a QM9 molecule with its estimated dipole arrow"></div>
-      <figcaption><span class="dot"></span><span id="hero-cap">A held-out test molecule. The arrow is the dipole estimated from charges × positions, the feature that does most of the model's work.</span></figcaption>
+      <figcaption><span class="dot"></span><span id="hero-cap">A held-out test molecule with its estimated dipole arrow.</span></figcaption>
     </figure>
   </div>
   <div class="cards">
-    <div class="card"><div class="big" data-v="best_mae">–</div><div class="lbl">test MAE (Debye) of the best model, gradient boosting with structure + geometry features</div></div>
-    <div class="card"><div class="big" data-v="best_vs_mean">–</div><div class="lbl">lower error than predicting the training mean (MAE <span data-v="mean_mae"></span> D)</div></div>
-    <div class="card"><div class="big" data-v="geo_gain">–</div><div class="lbl">lower error from adding 3D-geometry features to the 2D graph features (same model)</div></div>
-    <div class="card"><div class="big" data-v="size_penalty">–</div><div class="lbl">higher error when the model has never seen a 9-heavy-atom molecule (vs. a size-matched random control)</div></div>
+    <div class="card"><div class="big" data-v="best_mae">–</div><div class="lbl">average error of the best model</div></div>
+    <div class="card"><div class="big" data-v="best_vs_mean">–</div><div class="lbl">less error than guessing the average</div></div>
+    <div class="card"><div class="big" data-v="geo_gain">–</div><div class="lbl">less error once 3D geometry is added</div></div>
+    <div class="card"><div class="big" data-v="size_penalty">–</div><div class="lbl">more error on molecules larger than any seen in training</div></div>
   </div>
 </header>
 <main>
 
 <!-- ======================================================= -->
-<section id="question">
-  <h2><span class="num">1</span>Question and scope</h2>
-  <p class="lead-sub">What exactly is predicted, from what, and when.</p>
-  <p><b>Question.</b> Can the magnitude of a molecule's dipole moment, μ (in Debye), as computed by density-functional
-    theory (DFT, B3LYP/6-31G(2df,p)), be predicted from the molecule's structure alone, so that the DFT
-    property calculation could be skipped when screening many small molecules for polarity? Three sub-questions:</p>
-  <ol class="tight">
-    <li>How much better than trivial baselines does a tuned model do?</li>
-    <li>Does <b>3D geometry</b> add information beyond the <b>2D bond graph</b>? (a feature-set ablation)</li>
-    <li>Do the models still work on molecules that are <b>chemically new</b> (unseen ring scaffolds) or
-      <b>larger</b> than anything in training?</li>
-  </ol>
-  <div class="two">
-    <div>
-      <h3>Unit of analysis and target</h3>
-      <ul class="tight">
-        <li><b>One row = one molecule</b> (≤ 9 heavy atoms C, N, O, F, plus H).</li>
-        <li><b>Target</b>: μ, the DFT dipole-moment magnitude in Debye (D). This makes it a regression task.</li>
-        <li><b>Prediction time</b>: after the structure is known, before the DFT property calculation.</li>
-      </ul>
+<section id="why">
+  <div class="sec-head"><span class="num">1</span><div><h2>Why this project</h2>
+    <p class="takeaway">A rule from school chemistry made this look trivial. <b>It isn't</b>, and that is what made it worth studying.</p></div></div>
+
+  <div class="story-row">
+    <div class="story-steps">
+      <div class="step"><span class="step-n">1</span><div><b>We learned it in school</b>
+        <p>In Class 11 chemistry, the dipole moment of a molecule is the <i>vector sum of its bond dipoles</i>: add up each polar bond, taking the
+          angles into account. Water's two O–H bonds at 104.5° give 1.85 D.</p></div></div>
+      <div class="step"><span class="step-n">2</span><div><b>So it looked trivial</b>
+        <p>Looking for an ML problem, we found dipole prediction on QM9. With a rule like that, we expected a quick win: sum the bonds
+          and you are done.</p></div></div>
     </div>
-    <div>
-      <h3>Information available at prediction time</h3>
-      <ul class="tight">
-        <li><b>Structure-only models</b> use the bond graph (which atoms, which bonds), which is known before any quantum calculation.</li>
-        <li><b>Geometry models</b> also use 3D coordinates. In QM9 these are DFT-optimised, so for these models
-          the honest claim is <i>“skip the property calculation given a good geometry”</i>, not “skip DFT”.</li>
-        <li>All other DFT outputs (energies, HOMO/LUMO, polarisability, charges, frequencies) are <b>excluded</b>:
-          they come from the same calculation as the target.</li>
-      </ul>
+    <figure class="ncert">
+      <a href="img/ncert-vector-sum.webp" target="_blank" rel="noopener"><img src="img/ncert-vector-sum.webp" width="900" height="1080" loading="lazy"
+        alt="NCERT Class 11 Chemistry excerpt: the dipole moment of a polyatomic molecule is the vector sum of the bond dipoles, illustrated with H2O (1.85 D)."></a>
+      <figcaption>The rule as we learned it. NCERT Chemistry Part I, Class XI, Unit 4, p. 111.</figcaption>
+    </figure>
+  </div>
+
+  <div class="story-row flip">
+    <figure class="ncert">
+      <a href="img/ncert-nh3-nf3.webp" target="_blank" rel="noopener"><img src="img/ncert-nh3-nf3.webp" width="900" height="1080" loading="lazy"
+        alt="NCERT excerpt: NF3 has a much smaller dipole moment than NH3 because the lone-pair orbital dipole opposes the N–F bond dipoles."></a>
+      <figcaption>Even the textbook shows the rule bending: N–F bonds are more polar than N–H, yet NF₃'s dipole is 6× smaller, because of the lone pair. NCERT, p. 112.</figcaption>
+    </figure>
+    <div class="story-steps">
+      <div class="step"><span class="step-n">3</span><div><b>Then we tested the rule</b>
+        <p>A molecule's dipole comes from its whole electron cloud: lone pairs, resonance and charge shifting between neighbouring atoms all
+          change each “bond dipole”. We applied the textbook rule to every test molecule, with the true 3D geometry and the best possible scale factor:</p></div></div>
+      <div class="rule-vs">
+        <div class="rv"><span>Textbook rule (bond-dipole vector sum)</span><i style="--w:99%" class="bad"></i><b>1.18 D</b></div>
+        <div class="rv"><span>Just guess the average</span><i style="--w:100%" class="base"></i><b><span data-v="mean_mae">1.19</span> D</b></div>
+        <div class="rv"><span>Our best model</span><i style="--w:29%" class="good"></i><b data-v="best_mae">0.341 D</b></div>
+        <p class="note">Average error on the same <span data-v="n_test"></span> held-out molecules. The rule explains almost none of the variation (R² ≈ 0).</p>
+      </div>
     </div>
   </div>
-  <div class="callout"><b>Limits of the claim.</b> Results apply to DFT dipoles of QM9-like molecules (≤ 9 heavy atoms,
-    elements H, C, N, O, F) in the gas phase at a single optimised geometry. They say nothing about experimental dipoles,
-    drug-sized molecules, or solvated or flexible conformers, and a good prediction does not explain <i>why</i> a molecule is polar.</div>
+
+  <div class="step wide"><span class="step-n">4</span><div><b>Why a fast estimate is useful</b>
+    <p>The accurate answer needs a quantum-chemistry (DFT) calculation, whose cost grows steeply with molecule size: roughly the cube to
+      fourth power of the number of electrons. That is fine for one molecule but expensive across the millions considered in a screening study.
+      A model that predicts the dipole in milliseconds can filter candidates first, so the expensive calculation is spent only on the promising ones.</p></div></div>
+  <div class="uses">
+    <div><b>Drug discovery</b><p>Polarity shapes solubility and how easily a molecule crosses cell membranes.</p></div>
+    <div><b>Solvents &amp; electrolytes</b><p>Dipole moment governs how well a solvent dissolves salts and polar compounds.</p></div>
+    <div><b>Materials</b><p>Molecular dipoles affect how organic electronic and dielectric materials pack and respond to fields.</p></div>
+  </div>
+  <details class="more"><summary>How the textbook-rule number was computed</summary>
+    <div class="more-body prose">
+      <p>For each molecule we summed, over every bond, the Pauling electronegativity difference times the bond vector from the DFT-optimised
+        3D coordinates (our <code>phys_bond_dipole</code> feature). The result has arbitrary units, so we gave the rule its best chance:
+        one scale factor (1.34), fitted by least squares on the <i>training</i> molecules only. On the main random test split it reaches
+        MAE 1.18 D, median error 1.00 D, and only 25% of molecules within 0.5 D, against 78% for our best model.</p>
+      <p>The rule is not useless: the same vector sum is one of our input features, and the model learns to correct it using
+        everything else it knows about the molecule (see <a href="#ablation">the ablation</a>).</p>
+    </div>
+  </details>
+</section>
+
+<!-- ======================================================= -->
+<section id="question">
+  <div class="sec-head"><span class="num">2</span><div><h2>The question</h2>
+    <p class="takeaway">Can the DFT dipole moment μ be predicted from structure, so the expensive property calculation can be skipped when screening molecules?</p></div></div>
+  <div class="q-cards">
+    <a class="q-card" href="#results"><span class="q-n">Q1</span><b>How much better than a trivial baseline?</b><span class="q-a">→ <span data-v="best_vs_mean"></span> lower error than predicting the mean</span></a>
+    <a class="q-card" href="#ablation"><span class="q-n">Q2</span><b>Does 3D geometry add information beyond the 2D bond graph?</b><span class="q-a">→ yes, <span data-v="geo_gain"></span> lower error</span></a>
+    <a class="q-card" href="#robustness"><span class="q-n">Q3</span><b>Do models work on new ring systems and larger molecules?</b><span class="q-a">→ mostly: +18% and +7% error</span></a>
+  </div>
+  <div class="facts">
+    <div><span class="k">Unit</span>one molecule (≤ 9 heavy atoms: C, N, O, F + H)</div>
+    <div><span class="k">Target</span>μ, dipole magnitude in Debye (regression)</div>
+    <div><span class="k">Inputs</span>bond graph; optionally 3D coordinates</div>
+  </div>
+  <details class="more"><summary>Scope, inputs and limits of the claim</summary>
+    <div class="more-body two">
+      <div>
+        <h4>What the models may use</h4>
+        <ul class="tight">
+          <li><b>Structure-only models</b> use the bond graph (which atoms, which bonds), known before any quantum calculation.</li>
+          <li><b>Geometry models</b> also use 3D coordinates. In QM9 these are DFT-optimised, so the honest claim is
+            <i>“skip the property calculation given a good geometry”</i>, not “skip DFT”.</li>
+          <li>All other DFT outputs (energies, HOMO/LUMO, polarisability, charges, frequencies) are <b>excluded</b>:
+            they come from the same calculation as the target.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Limits of the claim</h4>
+        <p>Labels are DFT (B3LYP/6-31G(2df,p)) dipoles of QM9-like molecules, in the gas phase at a single optimised geometry.
+          Results say nothing about experimental dipoles, drug-sized molecules, or solvated or flexible conformers, and a good
+          prediction does not explain <i>why</i> a molecule is polar.</p>
+      </div>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================= -->
 <section id="data">
-  <h2><span class="num">2</span>Data</h2>
-  <p class="lead-sub">QM9, the standard quantum-chemistry benchmark of 133,885 small organic molecules.</p>
-  <div class="two">
-    <div>
-      <h3>Source and access</h3>
+  <div class="sec-head"><span class="num">3</span><div><h2>Data</h2>
+    <p class="takeaway">QM9: 134k small organic molecules (up to 9 heavy atoms), each with a DFT-computed dipole moment.</p></div></div>
+  <div class="tiles">
+    <div class="tile"><div class="v" data-v="n_sdf">–</div><div class="k">molecules in the file</div></div>
+    <div class="tile"><div class="v" data-v="n_kept">–</div><div class="k">parsed and used</div></div>
+    <div class="tile"><div class="v"><span data-v="mu_mean">–</span> D</div><div class="k">mean μ (max <span data-v="mu_max"></span> D)</div></div>
+    <div class="tile"><div class="v">82%</div><div class="k">have exactly 9 heavy atoms</div></div>
+  </div>
+  <div class="plot" id="plot-hist"></div>
+  <p class="figcap">Distribution of μ (log-scale counts). Most molecules sit between 1 and 5 D. Symmetric molecules cluster near 0 D,
+    and a long tail of charge-separated <b>zwitterions</b> reaches 30 D.</p>
+  <details class="more"><summary>Source, access and data-quality checks</summary>
+    <div class="more-body">
       <ul class="tight">
         <li>QM9 (Ramakrishnan et al., <i>Scientific Data</i> 2014); molecules enumerated from GDB-17 (Ruddigkeit et al. 2012).</li>
         <li>We use the MoleculeNet / DeepChem copy (<code>qm9.zip</code>: <code>gdb9.sdf</code> with 3D structures +
-          <code>gdb9.sdf.csv</code> with properties). It is public and free with citation, and needs no credentials. Its SHA-256 is in the repo.</li>
-        <li>The Kaggle “Molecular Property Prediction Challenge” uses a 20k-molecule QM9 subset with hidden test
-          labels, so we built our own splits from the full labelled set.</li>
+          <code>gdb9.sdf.csv</code> with properties). It is public and free with citation; its SHA-256 is in the repo.</li>
+        <li>The Kaggle “Molecular Property Prediction Challenge” uses a 20k-molecule subset with hidden test labels, so we
+          built our own splits from the full labelled set.</li>
+        <li>Target μ: mean <span data-v="mu_mean"></span> D, median <span data-v="mu_median"></span> D, right-skewed (skew <span data-v="mu_skew"></span>).</li>
       </ul>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Check</th><th>Finding</th><th>Decision</th></tr></thead>
+        <tbody>
+          <tr><td>Structures RDKit cannot parse</td><td><span data-v="n_fail"></span> molecules (1.4%) fail valence sanitisation; their mean μ
+            is <span data-v="mu_fail"></span> D vs <span data-v="mu_kept"></span> D for the rest</td><td>Excluded (features cannot be computed). A small
+            selection effect, listed in <code>results/rdkit_failed_molecules.csv</code>.</td></tr>
+          <tr><td>Missing labels / missing or infinite feature values</td><td>None found</td><td>An imputer is still kept inside the pipeline as a guard.</td></tr>
+          <tr><td>Same 2D graph appearing more than once</td><td><span data-v="dup_rows"></span> molecules share their bond graph with another
+            (stereo-isomers / conformers); within a graph μ differs by up to <span data-v="dup_spread"></span> D</td><td>Kept, but each graph sits on
+            <i>one</i> side of every split, so no test graph is seen in training. These set a floor on 2D-only error.</td></tr>
+          <tr><td>Extreme values</td><td><span data-v="n_above10"></span> molecules above 10 D, almost all zwitterions such as
+            <code>[NH3+]CCCCCC(=O)[O-]</code> (29.6 D)</td><td>Kept: real chemistry, not errors. Dropping them would make the test look easier.</td></tr>
+          <tr><td>Near-zero dipoles</td><td><span data-v="n_below01"></span> molecules below 0.1 D (<span data-v="n_zero"></span> exactly 0, e.g. methane)</td><td>Kept, and analysed as an error group.</td></tr>
+          <tr><td>QM9's list of ~3k molecules that failed a geometry-consistency check</td><td>Could not be downloaded
+            (figshare blocked automated access)</td><td>Not applied; noted as a limitation.</td></tr>
+        </tbody></table></div>
     </div>
-    <div>
-      <h3>Size and key variables</h3>
-      <ul class="tight">
-        <li><span data-v="n_sdf"></span> molecules in the file; <b><span data-v="n_kept"></span></b> parsed and used.</li>
-        <li>Inputs: element of each atom, bonds (graph), 3D coordinates.</li>
-        <li>Target μ: mean <span data-v="mu_mean"></span> D, median <span data-v="mu_median"></span> D, max <span data-v="mu_max"></span> D;
-          right-skewed (skew <span data-v="mu_skew"></span>).</li>
-        <li>82% of molecules have exactly 9 heavy atoms.</li>
-      </ul>
-    </div>
+  </details>
+</section>
+
+<!-- ======================================================= -->
+<section id="method">
+  <div class="sec-head"><span class="num">4</span><div><h2>Method</h2>
+    <p class="takeaway">Five feature groups, two baselines and eight models, all tuned on training data only and tested once.</p></div></div>
+
+  <div class="tabs" role="tablist" aria-label="Method details">
+    <button role="tab" class="on" aria-selected="true" data-tab="tab-features">Features</button>
+    <button role="tab" aria-selected="false" data-tab="tab-models">Models</button>
+    <button role="tab" aria-selected="false" data-tab="tab-eval">Evaluation</button>
   </div>
-  <div class="plot" id="plot-hist"></div>
-  <p class="figcap">Distribution of μ over all molecules (log-scale counts). The bulk lies between 1 and 5 D, a cluster of
-    symmetric molecules sits near 0 D, and a long tail of charge-separated <b>zwitterions</b> reaches 30 D.</p>
-  <h3>Quality checks and what we did about them</h3>
-  <div class="tablewrap"><table>
-    <thead><tr><th>Check</th><th>Finding</th><th>Decision</th></tr></thead>
-    <tbody>
-      <tr><td>Structures RDKit cannot parse</td><td><span data-v="n_fail"></span> molecules (1.4%) fail valence sanitisation; their mean μ
-        is <span data-v="mu_fail"></span> D vs <span data-v="mu_kept"></span> D for the rest</td><td>Excluded (features cannot be computed). This is a small
-        selection effect, listed in <code>results/rdkit_failed_molecules.csv</code>.</td></tr>
-      <tr><td>Missing labels / missing or infinite feature values</td><td>None found</td><td>An imputer is still kept inside the pipeline as a guard.</td></tr>
-      <tr><td>Same 2D graph appearing more than once</td><td><span data-v="dup_rows"></span> molecules share their bond graph with another molecule
-        (stereo-isomers / conformers); within a graph μ differs by up to <span data-v="dup_spread"></span> D</td><td>Kept, but each graph is
-        placed on <i>one</i> side of every split so no test graph is seen in training. These molecules set a floor on 2D-only error.</td></tr>
-      <tr><td>Extreme values</td><td><span data-v="n_above10"></span> molecules above 10 D, almost all zwitterions such as
-        <code>[NH3+]CCCCCC(=O)[O-]</code> (29.6 D)</td><td>Kept: these are real chemistry, not errors. Dropping them would make the test look easier.</td></tr>
-      <tr><td>Near-zero dipoles</td><td><span data-v="n_below01"></span> molecules below 0.1 D (<span data-v="n_zero"></span> exactly 0, e.g. methane)</td><td>Kept, and analysed as an error group.</td></tr>
-      <tr><td>QM9's official list of ~3k molecules that failed a geometry-consistency check</td><td>Could not be downloaded
-        (figshare blocked automated access)</td><td>Not applied; noted as a limitation.</td></tr>
-    </tbody></table></div>
-</section>
 
-<!-- ======================================================= -->
-<section id="preprocessing">
-  <h2><span class="num">3</span>Preprocessing and features</h2>
-  <p class="lead-sub">What the models see, and why nothing learned touches the test set.</p>
-  <p>Each SDF block is parsed with RDKit into one row. We read <b>only</b> <code>mol_id</code> and <code>mu</code> from the
-    property table. From the structure we compute five groups of features:</p>
-  <div class="tablewrap"><table>
-    <thead><tr><th>Group</th><th class="n">#</th><th>What it is</th><th>Why</th></tr></thead>
-    <tbody>
-      <tr><td><b>Composition</b></td><td class="n">7</td><td>counts of H, C, N, O, F; total and heavy atoms</td><td>The cheapest description; used by baseline 2.</td></tr>
-      <tr><td><b>2D descriptors</b></td><td class="n">~190</td><td>RDKit graph descriptors: polar surface area, logP, ring counts, topological indices, and
-        85 functional-group counts (nitrile, carbonyl, hydroxyl, amine…)</td><td>Polarity is driven by polar groups; this is the full “structure-only” view.</td></tr>
-      <tr><td><b>Charge statistics</b></td><td class="n">4</td><td>max / min / mean-|q| / sd of <b>Gasteiger</b> partial charges</td>
-        <td>Gasteiger charges come from an electronegativity-equalisation rule on the graph, with <i>no</i> quantum calculation,
-          so they are not the DFT Mulliken charges.</td></tr>
-      <tr><td><b>Geometry</b></td><td class="n">35</td><td>29 sorted Coulomb-matrix eigenvalues; moments of inertia, radius of
-        gyration, asphericity, max interatomic distance</td><td>Rotation-, translation- and atom-order-invariant summaries of the 3D shape.</td></tr>
-      <tr><td><b>Dipole estimates</b></td><td class="n">2</td><td>|Σ q<sub>i</sub> r<sub>i</sub>| from Gasteiger charges and 3D positions;
-        |Σ<sub>bonds</sub> Δχ · bond vector| from Pauling electronegativities</td>
-        <td>A dipole <i>is</i> a charge-weighted sum of positions, so this is a crude physical approximation that the model can correct.</td></tr>
-    </tbody></table></div>
-  <ul>
-    <li><b>Feature sets compared:</b> <i>structure only</i> = composition + 2D + charge stats; <i>full</i> = all five groups.
-      The ablation also tests the geometry and dipole-estimate groups separately.</li>
-    <li><b>Learned preprocessing</b> (median imputation → removal of constant columns → standardisation) is a scikit-learn
-      <code>Pipeline</code>. During cross-validation it is re-fitted on the training folds only, and the final fit sees only the
-      training split, so no statistic of a test molecule ever leaks into the model. 22 descriptor columns
-      (e.g. sulfur groups) are constant in QM9 and are dropped this way.</li>
-    <li><b>Scaling</b> is applied for distance- or penalty-based models (Ridge, Lasso, k-NN, SVR, MLP), not for trees, which are scale-invariant.</li>
-    <li><b>Target kept on its original scale</b> (no log transform). The task metric is error in Debye, and the
-      zwitterion tail is real and should be predicted, not compressed away.</li>
-  </ul>
-</section>
-
-<!-- ======================================================= -->
-<section id="methods">
-  <h2><span class="num">4</span>Baselines and methods</h2>
-  <p class="lead-sub">Two baselines, then a range of models from the course, from linear to highly flexible.</p>
-  <div class="tablewrap"><table>
-    <thead><tr><th>Model</th><th>Objective / core idea</th><th>Assumptions</th><th>Why it is here</th></tr></thead>
-    <tbody>
-      <tr class="base"><td>Mean baseline</td><td>predict the training mean μ for every molecule</td><td>none</td><td>Every model must beat this. R² is measured against it.</td></tr>
-      <tr class="base"><td>Linear reg. on atom counts</td><td>least squares on 7 composition counts</td><td>μ additive in atom types</td><td>A meaningful cheap baseline: “is it just which atoms are present?”</td></tr>
-      <tr><td>Ridge / Lasso</td><td>least squares + L2 / L1 penalty (α tuned)</td><td>linear in features</td><td>Tests how far a linear model on rich features gets. Lasso also checks whether a sparse subset suffices.</td></tr>
-      <tr><td>k-NN</td><td>distance-weighted average of the k nearest training molecules</td><td>similar descriptors → similar μ</td><td>Non-parametric similarity baseline. Sensitive to scaling and dimension.</td></tr>
-      <tr><td>Decision tree</td><td>greedy axis-aligned splits minimising squared error (depth, leaf size tuned)</td><td>piecewise-constant μ</td><td>Captures interactions. Interpretable, but high variance.</td></tr>
-      <tr><td>Random forest</td><td>average of 200 bootstrap trees with random feature subsets</td><td>as tree; reduces variance</td><td>Bagging lowers tree variance without much extra bias.</td></tr>
-      <tr><td>Gradient boosting</td><td>trees added sequentially to fit the residuals (histogram GBM, early stopping)</td><td>additive in trees</td><td>Usually strongest on tabular data; reduces bias step by step.</td></tr>
-      <tr><td>SVR (RBF kernel)</td><td>ε-insensitive loss + margin; kernel gives a smooth non-linear fit</td><td>smooth μ in feature space</td><td>Margin-based method. Trained on 20k molecules because the kernel cost grows ~n².</td></tr>
-      <tr><td>MLP (neural net)</td><td>2 hidden layers (256, 128), ReLU, Adam, early stopping</td><td>smooth non-linear map</td><td>Checks whether a generic neural net helps on these descriptors.</td></tr>
-    </tbody></table></div>
-  <p class="muted">We deliberately did not use graph neural networks. They are not required, and the questions here
-    (baselines, geometry ablation, generalisation) can be answered with methods we can fully explain.</p>
-</section>
-
-<!-- ======================================================= -->
-<section id="evaluation">
-  <h2><span class="num">5</span>Evaluation design</h2>
-  <p class="lead-sub">Splits were fixed before any model was trained; the test set is used once per model.</p>
-  <div class="two">
-    <div>
-      <h3>Main protocol</h3>
-      <ol class="tight">
-        <li><b>Split</b>: 80% train / 20% test, random but <b>grouped by 2D graph</b>; seed 0 for every model, plus seeds 1 and 2 for the baselines, Ridge, the tree and gradient boosting.</li>
-        <li><b>Tune</b>: 5-fold cross-validation (MAE) on a random 15k subsample of the <i>training</i> part only.</li>
-        <li><b>Refit</b> the chosen setting on the full training part (SVR: 20k).</li>
-        <li><b>Test once</b> on the held-out 20% (<span data-v="n_test"></span> molecules).</li>
-      </ol>
+  <div class="tab-panel" id="tab-features" role="tabpanel">
+    <div class="feat-grid">
+      <div class="feat"><b>Composition</b><span class="cnt">7</span><p>Atom counts (H, C, N, O, F, heavy, total).</p></div>
+      <div class="feat"><b>2D descriptors</b><span class="cnt">~190</span><p>RDKit graph descriptors and 85 functional-group counts.</p></div>
+      <div class="feat"><b>Charge statistics</b><span class="cnt">4</span><p>Gasteiger partial charges: computed from the graph, no quantum calculation.</p></div>
+      <div class="feat"><b>Geometry</b><span class="cnt">35</span><p>Coulomb-matrix eigenvalues and shape moments; invariant to rotation and atom order.</p></div>
+      <div class="feat hi"><b>Dipole estimates</b><span class="cnt">2</span><p>|Σ q<sub>i</sub> r<sub>i</sub>| from charges × positions, and an electronegativity bond-dipole sum.</p></div>
     </div>
-    <div>
-      <h3>Metrics</h3>
-      <ul class="tight">
-        <li><b>MAE (D)</b>, the main metric: the average error in the target's own unit, and robust to the zwitterion tail.</li>
-        <li><b>RMSE (D)</b> penalises large misses, so the gap between RMSE and MAE shows how heavy the error tail is.</li>
-        <li><b>R²</b>: the fraction of variance explained relative to the mean baseline.</li>
-        <li><b>Uncertainty</b>: 95% bootstrap CI over test molecules, and the spread over 3 seeds.</li>
-        <li><b>Paired bootstrap</b> on the same test molecules to compare two models.</li>
-      </ul>
-    </div>
+    <p class="note"><b>Structure only</b> = composition + 2D + charges. <b>Full</b> = all five groups.</p>
+    <details class="more"><summary>Preprocessing details</summary>
+      <div class="more-body">
+        <ul class="tight">
+          <li>Each SDF block is parsed with RDKit into one row. Only <code>mol_id</code> and <code>mu</code> are read from the property table.</li>
+          <li><b>Learned preprocessing</b> (median imputation → removal of constant columns → standardisation) is a scikit-learn
+            <code>Pipeline</code>, re-fitted on training folds only, so no statistic of a test molecule leaks into the model.
+            22 descriptor columns (e.g. sulfur groups) are constant in QM9 and are dropped this way.</li>
+          <li><b>Scaling</b> is applied for distance- or penalty-based models (Ridge, Lasso, k-NN, SVR, MLP), not for trees.</li>
+          <li><b>Target kept on its original scale</b> (no log transform): the metric is error in Debye, and the zwitterion tail is real.</li>
+          <li>A dipole <i>is</i> a charge-weighted sum of positions, so the dipole-estimate features are a crude physical approximation that the model can correct.</li>
+        </ul>
+      </div>
+    </details>
   </div>
-  <h3>Stress tests (each with its own tuning inside its own training set)</h3>
-  <div class="tablewrap"><table>
-    <thead><tr><th>Split</th><th>Train → test</th><th>What it asks</th><th>Fair comparison</th></tr></thead>
-    <tbody>
-      <tr><td><b>Scaffold</b></td><td>whole Bemis–Murcko ring scaffolds held out (<span data-v="n_scaf_test"></span> test molecules, all with rings)</td>
-        <td>Does it generalise to <i>ring systems never seen</i>? In the random split, 80% of test molecules have a scaffold that also appears in training.</td>
-        <td>Random split scored on ring-containing test molecules only</td></tr>
-      <tr><td><b>Size</b></td><td>train on ≤ 8 heavy atoms (22,035) → test on 9-heavy-atom molecules (21,987)</td>
-        <td>Can it <i>extrapolate</i> to larger molecules?</td><td>Same test pool, trained on a <i>random</i> 22,035 molecules (size-matched control)</td></tr>
-    </tbody></table></div>
-  <div class="callout">Why the controls matter: the scaffold test set has no acyclic molecules and the size split trains on
-    5× less data. Without the matched controls, those differences would be confused with the effect we want to measure.</div>
+
+  <div class="tab-panel" id="tab-models" role="tabpanel" hidden>
+    <div class="model-chips">
+      <span class="mc base">Mean baseline</span><span class="mc base">Linear reg. on atom counts</span>
+      <span class="mc">Ridge</span><span class="mc">Lasso</span><span class="mc">k-NN</span><span class="mc">Decision tree</span>
+      <span class="mc">Random forest</span><span class="mc">Gradient boosting</span><span class="mc">SVR (RBF)</span><span class="mc">MLP</span>
+    </div>
+    <p class="note">From linear to highly flexible. We deliberately did not use graph neural networks: the questions here can be answered with methods we can fully explain.</p>
+    <details class="more"><summary>What each model does and why it is here</summary>
+      <div class="more-body">
+        <div class="tablewrap"><table>
+          <thead><tr><th>Model</th><th>Core idea</th><th>Assumes</th><th>Why it is here</th></tr></thead>
+          <tbody>
+            <tr class="base"><td>Mean baseline</td><td>predict the training mean for every molecule</td><td>none</td><td>Every model must beat this. R² is measured against it.</td></tr>
+            <tr class="base"><td>Linear reg. on atom counts</td><td>least squares on 7 composition counts</td><td>μ additive in atom types</td><td>“Is it just which atoms are present?”</td></tr>
+            <tr><td>Ridge / Lasso</td><td>least squares + L2 / L1 penalty (α tuned)</td><td>linear in features</td><td>How far a linear model on rich features gets; Lasso checks whether a sparse subset suffices.</td></tr>
+            <tr><td>k-NN</td><td>distance-weighted average of the k nearest training molecules</td><td>similar descriptors → similar μ</td><td>Non-parametric similarity baseline.</td></tr>
+            <tr><td>Decision tree</td><td>greedy axis-aligned splits (depth, leaf size tuned)</td><td>piecewise-constant μ</td><td>Captures interactions; interpretable but high variance.</td></tr>
+            <tr><td>Random forest</td><td>average of 200 bootstrap trees with random feature subsets</td><td>as tree</td><td>Bagging lowers tree variance.</td></tr>
+            <tr><td>Gradient boosting</td><td>trees added sequentially to fit residuals (histogram GBM, early stopping)</td><td>additive in trees</td><td>Usually strongest on tabular data.</td></tr>
+            <tr><td>SVR (RBF kernel)</td><td>ε-insensitive loss + margin; smooth non-linear kernel fit</td><td>smooth μ</td><td>Margin-based; trained on 20k molecules because kernel cost grows ~n².</td></tr>
+            <tr><td>MLP</td><td>2 hidden layers (256, 128), ReLU, Adam, early stopping</td><td>smooth non-linear map</td><td>Does a generic neural net help on these descriptors?</td></tr>
+          </tbody></table></div>
+      </div>
+    </details>
+  </div>
+
+  <div class="tab-panel" id="tab-eval" role="tabpanel" hidden>
+    <ol class="steps">
+      <li><b>Split</b><span>80 / 20, grouped by 2D graph</span></li>
+      <li><b>Tune</b><span>5-fold CV on 15k training molecules</span></li>
+      <li><b>Refit</b><span>on the full training split</span></li>
+      <li><b>Test once</b><span>on <span data-v="n_test"></span> held-out molecules</span></li>
+    </ol>
+    <div class="facts">
+      <div><span class="k">Main metric</span>MAE in Debye, robust to the zwitterion tail</div>
+      <div><span class="k">Also</span>RMSE, R², 95% bootstrap CI, 3-seed spread</div>
+      <div><span class="k">Stress tests</span>unseen ring scaffolds; train ≤ 8 → test 9 heavy atoms</div>
+    </div>
+    <details class="more"><summary>Full protocol and stress-test design</summary>
+      <div class="more-body">
+        <ul class="tight">
+          <li>Seed 0 for every model, plus seeds 1 and 2 for the baselines, Ridge, the tree and gradient boosting.</li>
+          <li><b>RMSE</b> penalises large misses, so the RMSE–MAE gap shows how heavy the error tail is. <b>R²</b> is relative to the mean baseline.</li>
+          <li><b>Paired bootstrap</b> on the same test molecules compares two models.</li>
+        </ul>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Split</th><th>Train → test</th><th>What it asks</th><th>Fair comparison</th></tr></thead>
+          <tbody>
+            <tr><td><b>Scaffold</b></td><td>whole Bemis–Murcko ring scaffolds held out (<span data-v="n_scaf_test"></span> test molecules, all with rings)</td>
+              <td>Does it generalise to <i>ring systems never seen</i>? In the random split, 80% of test molecules share a scaffold with training.</td>
+              <td>Random split scored on ring-containing test molecules only</td></tr>
+            <tr><td><b>Size</b></td><td>train on ≤ 8 heavy atoms (22,035) → test on 9-heavy-atom molecules (21,987)</td>
+              <td>Can it <i>extrapolate</i> to larger molecules?</td><td>Same test pool, trained on a <i>random</i> 22,035 molecules</td></tr>
+          </tbody></table></div>
+        <p class="note">Each stress test is tuned inside its own training set. The matched controls matter: the scaffold test set has no acyclic molecules and the size split trains on 5× less data.</p>
+      </div>
+    </details>
+  </div>
 </section>
 
 <!-- ======================================================= -->
 <section id="results">
-  <h2><span class="num">6</span>Results</h2>
-  <p class="lead-sub">Main random split. Bars show seed-0 test MAE with 95% bootstrap CI. The table also gives mean ± sd over seeds.</p>
+  <div class="sec-head"><span class="num">5</span><div><h2>Results</h2>
+    <p class="takeaway">Every learned model beats both baselines, and <b>the features matter far more than the choice of model</b>.</p></div></div>
+  <div class="findings">
+    <div class="finding"><div class="fv">10×</div><div><b>Features beat models</b><p>Adding geometry moves MAE by ~0.2 D; switching among the top three models moves it by ~0.02 D.</p></div></div>
+    <div class="finding"><div class="fv">0.57 D</div><div><b>Linear models underfit</b><p>Ridge and Lasso stall even with all features: the dipole is a non-linear function.</p></div></div>
+    <div class="finding"><div class="fv">±0.001</div><div><b>Results are stable</b><p>SD of the best MAE across three random splits. Bootstrap CI ≈ ±0.005 D.</p></div></div>
+  </div>
   <div class="controls">
-    <span>Metric</span>
+    <span class="lbl">Metric</span>
     <div class="seg" id="metric-seg"><button data-m="mae" class="on">MAE</button><button data-m="rmse">RMSE</button><button data-m="r2">R²</button></div>
+    <span class="legend"><i style="background:var(--cbase)"></i>baseline <i style="background:var(--c2d)"></i>structure only <i style="background:var(--cfull)"></i>+ geometry</span>
   </div>
   <div class="plot" id="plot-models" style="min-height:420px"></div>
-  <p class="figcap">Grey = baselines; amber = structure-only features; blue = structure + geometry. Lower is better for MAE and RMSE.</p>
-  <div class="tablewrap"><table id="tbl-models"></table></div>
-  <div id="results-text">
-    <p><b>Every learned model beats both baselines by a wide margin.</b> Predicting the mean gives MAE 1.19 D. Knowing only
-      which atoms are present (linear regression on atom counts) improves this just to 1.01 D (R² 0.23). Polarity depends on how
-      atoms are connected and arranged, not only on which atoms are present.</p>
-    <p><b>The feature set matters more than the choice of model.</b> With structure-only features the best models reach about
-      0.54 D (gradient boosting, random forest). Adding the geometry features lowers the MAE of every model: by about 23% for
-      Ridge/Lasso, 31–38% for the tree, SVR, MLP and ensembles, but only 6% for k-NN. k-NN gains little because its Euclidean distance
-      over ~250 standardised features is dominated by the ~190 2D descriptors, so the few informative geometry features are diluted.
-      With full features the three strongest models are close: gradient boosting <b>0.341 D</b> (R² 0.88), MLP 0.356 D, random forest 0.363 D.
-      The gap between feature sets (≈ 0.2 D) is ten times the gap among these three models (≈ 0.02 D).</p>
-    <p><b>Linear models underfit.</b> Ridge and Lasso stay near 0.57 D even with all features, and CV picked the
-      <i>weakest</i> penalty in each grid. With ~100k molecules and ~250 features the linear models are limited by bias, not
-      variance, so regularisation barely matters and sparsity (Lasso) brings nothing. The dipole is a non-linear function
-      (the norm of a vector sum) of the features.</p>
-    <p><b>How certain are these numbers?</b> Across three different random splits the best model's MAE varies by only
-      ± 0.001 D (sd), and the 95% bootstrap interval on seed 0 is about ± 0.005 D. So the large effects are clearly real: geometry
-      vs structure-only (−0.200 D, CI [−0.206, −0.195]) and best model vs the atom-count baseline (−0.66 D). Gradient boosting also beats the random forest
-      (−0.022 D) and the MLP (−0.015 D) by more than test-set noise, but those two were run on one seed with small tuning grids. “Gradient boosting
-      is the best model” is therefore a weaker claim than “geometry features help a lot”.</p>
-    <p><b>Why is the CV error higher than the test error?</b> The tuning CV fits models on 12k molecules (4/5 of a 15k subsample);
-      the final models are refit on 105k. The learning curve below shows the error is still falling with more data, so the
-      CV scores were used only to <i>rank</i> settings, never as an estimate of final performance.</p>
-  </div>
-  <h3>Ablation: what part of the geometry helps?</h3>
+  <p class="figcap">Seed-0 test error on the main random split, with 95% bootstrap CI (MAE).</p>
+  <details class="more"><summary>Full results table</summary>
+    <div class="more-body"><div class="tablewrap"><table id="tbl-models"></table></div></div>
+  </details>
+  <details class="more"><summary>Discussion: baselines, underfitting, uncertainty</summary>
+    <div class="more-body prose" id="results-text">
+      <p><b>Every learned model beats both baselines by a wide margin.</b> Predicting the mean gives MAE 1.19 D. Knowing only
+        which atoms are present (linear regression on atom counts) improves this just to 1.01 D (R² 0.23). Polarity depends on how
+        atoms are connected and arranged, not only on which atoms are present.</p>
+      <p><b>The feature set matters more than the choice of model.</b> With structure-only features the best models reach about
+        0.54 D. Adding geometry lowers the MAE of every model: about 23% for Ridge/Lasso, 31–38% for the tree, SVR, MLP and
+        ensembles, but only 6% for k-NN, whose Euclidean distance over ~250 standardised features is dominated by the ~190 2D descriptors.
+        With full features the three strongest models are close: gradient boosting <b>0.341 D</b> (R² 0.88), MLP 0.356 D, random forest 0.363 D.</p>
+      <p><b>Linear models underfit.</b> Ridge and Lasso stay near 0.57 D even with all features, and CV picked the
+        <i>weakest</i> penalty in each grid. With ~100k molecules and ~250 features they are limited by bias, not variance, so
+        regularisation barely matters and sparsity brings nothing. The dipole (the norm of a vector sum) is non-linear in the features.</p>
+      <p><b>How certain are these numbers?</b> Across three random splits the best model's MAE varies by ± 0.001 D (sd), and the
+        95% bootstrap interval is about ± 0.005 D. So the large effects are clearly real: geometry vs structure-only (−0.200 D,
+        CI [−0.206, −0.195]) and best model vs the atom-count baseline (−0.66 D). Gradient boosting also beats the random forest
+        (−0.022 D) and the MLP (−0.015 D) by more than test-set noise, but those two ran on one seed with small tuning grids, so
+        “gradient boosting is best” is a weaker claim than “geometry features help a lot”.</p>
+      <p><b>Why is the CV error higher than the test error?</b> Tuning CV fits on 12k molecules; final models are refit on 105k.
+        The learning curve shows error still falling with more data, so CV scores were used only to <i>rank</i> settings.</p>
+    </div>
+  </details>
+
+  <h3 id="ablation">What part of the geometry helps?</h3>
+  <p class="takeaway sm">Two physics features, dipole estimates from <b>charges × positions</b>, carry almost all of the geometry benefit.</p>
   <div class="two">
-    <div class="plot" id="plot-ablation"></div>
-    <div class="plot" id="plot-importance"></div>
+    <div><div class="plot" id="plot-ablation"></div><p class="figcap">Test MAE as feature groups are added.</p></div>
+    <div><div class="plot" id="plot-importance"></div><p class="figcap">MAE increase when a group is shuffled (best model).</p></div>
   </div>
-  <p class="figcap">Left: test MAE as feature groups are added (Ridge and gradient boosting, seed 0). Right: grouped permutation
-    importance for the best model, i.e. how much the test MAE rises when one whole group is shuffled.</p>
-  <div id="ablation-text">
-    <p><b>Two physics-motivated features carry almost all of the geometry benefit.</b> Adding the 35 generic geometry descriptors
-      (Coulomb eigenvalues and shape) to the 2D features helps only a little: gradient boosting goes from 0.542 to 0.513 D, Ridge from 0.748 to 0.743 D.
-      Adding just the two dipole estimates instead, |Σ q<sub>i</sub>r<sub>i</sub>| from Gasteiger charges and the electronegativity bond-dipole
-      sum, brings gradient boosting to <b>0.345 D</b>, almost exactly the 0.341 D of the full set. Ridge moves from 0.748 to 0.576 D.
-      The permutation test agrees: shuffling just these <i>two</i> columns raises the full model's MAE by 0.66 D, almost as much as
-      shuffling all 208 2D descriptors together (0.83 D), while the 35 Coulomb/shape columns cost only 0.07 D. The 2D descriptors still
-      matter: they say which polar groups are present, and the dipole estimates say how those groups add up in 3D.
-      The point is <i>how</i> the 3D information is encoded. Generic invariant descriptors throw away directions; a dipole is a
-      vector sum, so a feature built the same way, from charges and positions, gives the model most of the answer, and the model
-      learns to correct its errors.</p>
-    <p class="muted" style="font-size:14px">This matches an earlier Kaggle-based study, which found that Coulomb-matrix eigenvalues alone
-      give a weak dipole model (MAE ≈ 0.8 D on a 20k-molecule subset) and that the representation matters more than the learner.</p>
-  </div>
+  <details class="more"><summary>Read the ablation in detail</summary>
+    <div class="more-body prose" id="ablation-text">
+      <p>Adding the 35 generic geometry descriptors (Coulomb eigenvalues and shape) to the 2D features helps only a little: gradient
+        boosting goes from 0.542 to 0.513 D, Ridge from 0.748 to 0.743 D. Adding just the two dipole estimates instead brings gradient
+        boosting to <b>0.345 D</b>, almost exactly the 0.341 D of the full set; Ridge moves from 0.748 to 0.576 D.</p>
+      <p>The permutation test agrees: shuffling just these <i>two</i> columns raises the full model's MAE by 0.66 D, almost as much as
+        shuffling all 208 2D descriptors together (0.83 D), while the 35 Coulomb/shape columns cost only 0.07 D. The 2D descriptors
+        still say which polar groups are present; the dipole estimates say how those groups add up in 3D.</p>
+      <p>The point is <i>how</i> 3D information is encoded. Generic invariant descriptors throw away directions; a dipole is a vector
+        sum, so a feature built the same way gives the model most of the answer, and the model learns to correct its errors.
+        This matches an earlier Kaggle-based study, where Coulomb-matrix eigenvalues alone gave a weak dipole model (MAE ≈ 0.8 D on 20k molecules).</p>
+    </div>
+  </details>
+
   <h3>Learning curve</h3>
+  <p class="takeaway sm">Good features are worth far more data: with geometry, <b>1,000</b> molecules match a structure-only model trained on <b>50,000</b>.</p>
   <div class="plot" id="plot-lc"></div>
-  <p class="figcap">Gradient boosting trained on growing subsets of the training split (hyper-parameters fixed from CV). Solid = test, dashed = training error.</p>
-  <div id="lc-text">
-    <p><b>Good features are worth far more data.</b> With geometry features, gradient boosting trained on only 1,000 molecules
-      (MAE 0.59 D) is already about as accurate as the structure-only model trained on 50,000 (0.57 D). Both curves are still falling at the
-      full training size (full features: 0.368 D at 50k → 0.342 D at 105k), so more data would still help a little. The gap between the
-      training error (dashed) and the test error shows the remaining variance. Training error is not monotone because early stopping picks a
-      different number of trees at each size.</p>
-  </div>
-  <h3>Is the difference real? Paired bootstrap on the same test molecules</h3>
-  <div class="tablewrap"><table id="tbl-tests"></table></div>
-  <p class="muted" style="font-size:14px">The bootstrap shows whether a gap is larger than test-set sampling noise for <i>this</i> split
-    and these fitted models. It cannot show that the gap would hold for other molecule families or other training runs.
-    The 3-seed spread and the stress tests address that.</p>
+  <p class="figcap">Gradient boosting on growing training subsets. Solid = test error, dotted = training error.</p>
+  <details class="more"><summary>Details and paired significance tests</summary>
+    <div class="more-body" id="lc-text">
+      <p class="prose">With geometry, 1,000 training molecules give MAE 0.59 D, about the 0.57 D of the structure-only model at 50,000. Both curves
+        are still falling at full size (full features: 0.368 D at 50k → 0.342 D at 105k), so more data would still help a little.
+        Training error is not monotone because early stopping picks a different number of trees at each size.</p>
+      <h4>Is the difference real? Paired bootstrap on the same test molecules</h4>
+      <div class="tablewrap"><table id="tbl-tests"></table></div>
+      <p class="note">The bootstrap shows whether a gap exceeds test-set noise for <i>this</i> split and these fitted models, not whether it would
+        hold for other molecule families. The 3-seed spread and the stress tests address that.</p>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================= -->
 <section id="explorer">
-  <h2><span class="num">7</span>Explore the predictions in 3D</h2>
-  <p class="lead-sub">Every point is a held-out test molecule (a random sample of <span data-v="n_explorer"></span>, plus the 15 worst).
-    Click a point to open the molecule in 3D, with the predictions of every model.</p>
+  <div class="sec-head"><span class="num">6</span><div><h2>Explore the predictions</h2>
+    <p class="takeaway">Each point is a held-out test molecule (<span data-v="n_explorer"></span> sampled + the 15 worst). Click one to open it in 3D.</p></div></div>
 
   <div class="demo">
-    <div class="demo-head"><span class="pill">Guided demo</span> Four molecules, four lessons. Click one to load it:</div>
+    <div class="demo-head"><span class="pill">Guided tour</span> Four molecules, four lessons:</div>
     <div class="demo-chips" id="demo-chips">
-      <button data-id="gdb_3269" data-story="Cycloheptane is symmetric, so its C–H bond dipoles cancel and the DFT dipole is ≈ 0 D. The estimated dipole arrow is almost invisible, and gradient boosting predicts 0.03 D. Look at Ridge and Lasso in the table: they predict a negative dipole (−0.43 D), which is impossible for a magnitude. A linear model does not know the target cannot go below zero."><b>Symmetric</b><span>bond dipoles cancel</span></button>
+      <button data-id="gdb_3269" data-story="Cycloheptane is symmetric, so its C–H bond dipoles cancel and the DFT dipole is ≈ 0 D. The estimated dipole arrow is almost invisible and gradient boosting predicts 0.03 D. But Ridge (−0.43 D) and Lasso (−0.52 D) predict a negative dipole, which is impossible for a magnitude: a linear model does not know the target cannot go below zero."><b>Symmetric</b><span>bond dipoles cancel</span></button>
       <button data-id="gdb_87278" data-story="A typical neutral molecule with one carbonyl group. Gradient boosting predicts 2.69 D, exactly the DFT value, and every model is within 0.35 D. This is the common case: 78% of test molecules are predicted within 0.5 D."><b>Typical</b><span>predicted almost exactly</span></button>
-      <button data-id="gdb_130921" data-story="A fused triazole with an aldehyde. Without geometry, gradient boosting predicts 3.37 D; with the geometry features it predicts 6.26 D (true 6.24 D). The 2D graph says which polar groups exist; only the 3D arrangement shows whether their dipoles add up or cancel. Here they add up. Switch the features toggle to compare."><b>Geometry wins</b><span>2D: 3.4 D → 3D: 6.3 D</span></button>
-      <button data-id="gdb_130454" data-story="A strongly charge-separated molecule: the true DFT dipole is 21 D, but gradient boosting predicts only 11 D. The charge × position estimate (16 D, the arrow) is actually closer to the truth than the model: molecules this polar are so rare in training that the trees pull the prediction toward typical values. RDKit also reads the structure with a +1 net charge and no balancing negative charge, so even the estimate is unreliable here. Molecules like this make up most of the worst errors."><b>Failure</b><span>charge-separated, 21 D</span></button>
+      <button data-id="gdb_130921" data-story="A fused triazole with an aldehyde. Without geometry, gradient boosting predicts 3.37 D; with geometry it predicts 6.26 D (true 6.24 D). The 2D graph says which polar groups exist; only the 3D arrangement shows whether their dipoles add up or cancel. Try the Features toggle."><b>Geometry wins</b><span>2D 3.4 D → 3D 6.3 D</span></button>
+      <button data-id="gdb_130454" data-story="Strongly charge-separated: the true dipole is 21 D, but gradient boosting predicts only 11 D. The charge × position estimate (16 D, the arrow) is closer than the model, because molecules this polar are rare in training and the trees pull toward typical values. Molecules like this make up most of the worst errors."><b>Failure</b><span>charge-separated, 21 D</span></button>
     </div>
   </div>
 
-  <div class="controls">
+  <div class="controls ex-controls">
     <label>Model <select id="ex-model"></select></label>
-    <span>Features</span><div class="seg" id="ex-fs"><button data-f="2d">Structure only</button><button data-f="full" class="on">+ Geometry</button></div>
+    <div class="seg" id="ex-fs" aria-label="Feature set"><button data-f="2d">Structure only</button><button data-f="full" class="on">+ Geometry</button></div>
     <label>Heavy atoms <select id="ex-heavy"><option value="all">all</option><option value="le7">≤ 7</option><option value="8">8</option><option value="9">9</option></select></label>
     <label>Rings <select id="ex-ring"><option value="all">all</option><option value="1">has ring</option><option value="0">acyclic</option></select></label>
-    <label>true μ from <input type="number" id="ex-lo" value="0" step="0.5" min="0"> to <input type="number" id="ex-hi" value="30" step="0.5" min="0"> D</label>
+    <label>μ <input type="number" id="ex-lo" value="0" step="0.5" min="0" aria-label="minimum true dipole"> – <input type="number" id="ex-hi" value="30" step="0.5" min="0" aria-label="maximum true dipole"> D</label>
   </div>
   <div class="stat-row" id="ex-stats"></div>
   <div class="explorer">
@@ -333,170 +391,176 @@
       <div class="lab-head"><h4 id="lab-title">Molecule viewer</h4><div class="seg small" id="lab-view"><button data-v="3d" class="on">3D</button><button data-v="2d">2D</button></div></div>
       <div class="lab-stage">
         <div id="lab-3d" class="mol3d"></div>
-        <svg id="mol-svg" role="img" aria-label="2D structure" hidden></svg>
-        <div class="lab-legend"><span class="arrow-key"></span> estimated dipole (charges × positions) · drag to rotate, scroll to zoom</div>
+        <div id="lab-2d" class="mol2d" hidden><svg id="mol-svg" role="img" aria-label="2D structure"></svg></div>
+        <div class="lab-legend" id="lab-legend"><span class="arrow-key"></span> estimated dipole · drag to rotate</div>
       </div>
       <div id="lab-story" class="story" hidden></div>
-      <div id="lab-body"><p class="muted">Click a point in the scatter plot, or a demo molecule above.</p></div>
+      <div id="lab-body"><p class="muted">Click a point in the scatter plot, or a molecule in the guided tour.</p></div>
     </div>
   </div>
-  <p class="figcap">The arrow is the <b>model's physics feature</b>, Σ q<sub>i</sub>r<sub>i</sub> with Gasteiger charges, not the DFT answer:
-    QM9 gives only the dipole's magnitude, not its direction. Arrow length is proportional to the estimate. Also try:
-    switch between <i>Structure only</i> and <i>+ Geometry</i> and watch the cloud tighten around the diagonal; set μ from 0 to 0.5 to see
-    symmetric molecules over-predicted; set μ ≥ 8 to see zwitterions under-predicted.</p>
+  <details class="more"><summary>What the arrow shows, and things to try</summary>
+    <div class="more-body prose">
+      <p>The arrow is the <b>model's physics feature</b>, Σ q<sub>i</sub>r<sub>i</sub> with Gasteiger charges, not the DFT answer:
+        QM9 gives only the dipole's magnitude, not its direction. Arrow length is proportional to the estimate.</p>
+      <ul class="tight">
+        <li>Switch between <i>Structure only</i> and <i>+ Geometry</i> and watch the cloud tighten around the diagonal.</li>
+        <li>Set μ from 0 to 0.5 to see symmetric molecules over-predicted.</li>
+        <li>Set μ from 8 upward to see zwitterions under-predicted.</li>
+      </ul>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================= -->
 <section id="errors">
-  <h2><span class="num">8</span>Error analysis</h2>
-  <p class="lead-sub">Where the best model (gradient boosting, full features, seed 0) goes wrong.</p>
+  <div class="sec-head"><span class="num">7</span><div><h2>Where the model goes wrong</h2>
+    <p class="takeaway">Typical error is small, but the tail is heavy, and predictions are <b>pulled toward the mean</b>.</p></div></div>
+  <div class="findings">
+    <div class="finding"><div class="fv">78%</div><div><b>Within 0.5 D</b><p>Median error 0.21 D; 94% of molecules are within 1 D.</p></div></div>
+    <div class="finding"><div class="fv">−1.1 D</div><div><b>Extremes shrink</b><p>Above 7 D under-predicted; below 1 D over-predicted by +0.2–0.3 D.</p></div></div>
+    <div class="finding"><div class="fv">13 / 15</div><div><b>Worst cases are charged</b><p>Zwitterions and charge-separated molecules dominate the largest errors.</p></div></div>
+  </div>
   <div class="plot" id="plot-bins"></div>
-  <p class="figcap">MAE by true-μ range. Low and very high dipoles are hardest, and the bias (mean residual, line) shows predictions are pulled toward the mean.</p>
-  <div id="errors-text">
-    <p><b>Typical error is small, but the tail is heavy.</b> The median absolute error is 0.21 D; 78% of test molecules are
-      within 0.5 D and 94% within 1 D. RMSE (0.53 D) is well above MAE (0.34 D) because a few molecules are missed by several Debye.</p>
-    <p><b>Predictions are pulled toward the mean.</b> The residual (prediction − truth) is negatively correlated with the true
-      dipole (r = −0.40). Molecules below 1 D are over-predicted by +0.2 to +0.3 D on average, and molecules above 7 D are under-predicted by
-      1.1 D. Two reasons: squared-error tree ensembles average over leaves, which shrinks rare extremes toward the dense middle of
-      the distribution; and a near-zero dipole needs bond dipoles to <i>cancel exactly</i>, so any small error in their estimated
-      directions or sizes adds up to a non-zero prediction. (The magnitude |μ| can never be negative, so errors near zero are one-sided.)</p>
-    <p><b>Geometry helps in every range</b>, most of all where the answer depends on how polar groups are arranged in space:
-      MAE falls from 0.73 to 0.39 D for 0.5–1 D molecules (partial cancellation) and from 1.10 to 0.56 D for 5–7 D molecules
-      (aligned polar groups). The 2D graph says <i>which</i> polar groups exist; only the 3D coordinates say whether their
-      dipoles add up or cancel.</p>
-  </div>
-  <h3>By chemical group</h3>
-  <div class="tablewrap"><table id="tbl-groups"></table></div>
-  <h3>The 15 worst predictions</h3>
-  <div class="tablewrap"><table id="tbl-worst"></table></div>
-  <div id="worst-text">
-    <p><b>The worst errors are charge-separated molecules.</b> 13 of these 15 molecules carry formal charges
-      (<code>[NH3+]</code>, <code>[NH2+]</code>, <code>[O-]</code>, <code>[CH+]</code>): zwitterions or strongly charge-separated
-      resonance forms. Their dipole is dominated by two full opposite charges a few Ångström apart. One elementary charge
-      separated by 1 Å is already 4.8 D, so a small error in where the charge sits becomes an error of several Debye. For these 13 molecules
-      the charge × position estimate is unreliable in both directions: it is below the truth for 10 of them, but far too high for others
-      (18.6 D for a molecule whose true dipole is 2.7 D). Charged molecules are also rare in training (the “Charged / zwitterion” row
-      above), so the trees pull their predictions toward typical values. The two uncharged ones (<code>gdb_129996</code>, <code>gdb_129994</code>) are fused
-      bicyclic molecules with several ring nitrogens, a rare motif among 9-atom molecules. Outside this table, the group with the
-      highest MAE is molecules whose 2D graph occurs more than once (0.72 D): the 2D-only model cannot tell them apart, and
-      even with geometry they remain hard.</p>
-    <p class="muted" style="font-size:14px">This points to the most promising change: features that describe charge separation
-      directly (e.g. the distance between formally charged atoms), or charges from a better (but still cheap) charge model.</p>
-  </div>
+  <p class="figcap">MAE by true-μ range for three models; the line is the mean residual (prediction − truth) of the best model.</p>
+  <details class="more"><summary>Why predictions shrink toward the mean</summary>
+    <div class="more-body prose" id="errors-text">
+      <p>RMSE (0.53 D) is well above MAE (0.34 D) because a few molecules are missed by several Debye. The residual is negatively
+        correlated with the true dipole (r = −0.40). Two reasons: squared-error tree ensembles average over leaves, which shrinks rare
+        extremes toward the dense middle; and a near-zero dipole needs bond dipoles to <i>cancel exactly</i>, so any small error in
+        their directions adds up to a non-zero prediction. (|μ| can never be negative, so errors near zero are one-sided.)</p>
+      <p><b>Geometry helps in every range</b>, most where the answer depends on spatial arrangement: MAE falls from 0.73 to 0.39 D
+        for 0.5–1 D molecules (partial cancellation) and from 1.10 to 0.56 D for 5–7 D molecules (aligned polar groups).</p>
+    </div>
+  </details>
+  <details class="more"><summary>Error by chemical group</summary>
+    <div class="more-body"><div class="tablewrap"><table id="tbl-groups"></table></div></div>
+  </details>
+  <details class="more"><summary>The 15 worst predictions</summary>
+    <div class="more-body">
+      <div class="tablewrap"><table id="tbl-worst"></table></div>
+      <div class="prose" id="worst-text">
+        <p>13 of these 15 carry formal charges (<code>[NH3+]</code>, <code>[NH2+]</code>, <code>[O-]</code>, <code>[CH+]</code>). Their dipole is
+          dominated by two full opposite charges a few Ångström apart; one elementary charge across 1 Å is already 4.8 D, so a small
+          error in where the charge sits becomes several Debye. The charge × position estimate is unreliable both ways for them (below
+          the truth for 10, but 18.6 D for one molecule whose true dipole is 2.7 D), and charged molecules are rare in training.
+          The two uncharged ones (<code>gdb_129996</code>, <code>gdb_129994</code>) are fused bicyclics with several ring nitrogens, a rare motif.
+          Outside this table, the hardest group is molecules whose 2D graph occurs more than once (0.72 D).</p>
+        <p class="note">Most promising fix: features that describe charge separation directly (e.g. the distance between formally charged atoms), or a better cheap charge model.</p>
+      </div>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================= -->
 <section id="robustness">
-  <h2><span class="num">9</span>Robustness: new scaffolds and larger molecules</h2>
-  <p class="lead-sub">The same models, tuned inside each split's own training data.</p>
-  <div class="plot" id="plot-robust" style="min-height:380px"></div>
-  <div class="tablewrap"><table id="tbl-robust"></table></div>
-  <div id="robust-text">
-    <h3>New ring scaffolds: a moderate, consistent penalty for flexible models</h3>
-    <p>Compared with its fair control (the random split scored on ring-containing molecules only), holding out whole ring
-      scaffolds raises the MAE of gradient boosting from 0.334 to <b>0.393 D (+18%)</b>, of the random forest by 17% and of the tree by 14%,
-      but of Ridge by only 3%. The flexible models partly rely on patterns specific to scaffolds they have seen; the linear model has
-      little such capacity to lose. The ranking does not change: on unseen scaffolds gradient boosting with geometry (0.39 D)
-      is still far better than Ridge (0.57 D) or any structure-only model (≥ 0.60 D). So the random-split numbers are
-      somewhat optimistic for genuinely new chemistry, by about a sixth, but the conclusions hold.</p>
-    <h3>Larger molecules: trees extrapolate gracefully, a linear model fails</h3>
-    <p>Trained only on molecules with ≤ 8 heavy atoms and tested on 9-heavy-atom molecules, gradient boosting reaches
-      0.450 D versus 0.420 D for a model trained on the same number of random molecules: a <b>7% penalty</b> for never having seen a
-      molecule of that size (random forest +4%, tree +6%, structure-only models +1–2%). Ridge with the full features, however, jumps from
-      0.58 to <b>1.92 D</b>: it over-predicts every 9-atom molecule by +1.8 D on average. The cause is one feature. The 9th-largest
-      Coulomb-matrix eigenvalue comes from a hydrogen in any molecule with ≤ 8 heavy atoms, but from a heavy atom in a 9-atom molecule,
-      so 99.8% of test molecules have a value beyond anything seen in training. A linear model multiplies that out-of-range value by its
-      coefficient and shifts all predictions. A tree only asks “is it above the last threshold?”, so its prediction stays within
-      the range of the training targets. This is the interpolation-versus-extrapolation lesson in practice: a feature that is fine
-      within the training range can be dangerous outside it.</p>
+  <div class="sec-head"><span class="num">8</span><div><h2>Robustness</h2>
+    <p class="takeaway">On new ring scaffolds and larger molecules, flexible models lose a little; a linear model can fail badly.</p></div></div>
+  <div class="findings">
+    <div class="finding"><div class="fv">+18%</div><div><b>Unseen ring scaffolds</b><p>Gradient boosting 0.334 → 0.393 D vs its fair control. Ranking unchanged.</p></div></div>
+    <div class="finding"><div class="fv">+7%</div><div><b>Larger molecules</b><p>Trained on ≤ 8 heavy atoms, tested on 9: trees extrapolate gracefully.</p></div></div>
+    <div class="finding bad"><div class="fv">1.92 D</div><div><b>Ridge breaks</b><p>From 0.58 D: one feature leaves its training range and shifts every prediction.</p></div></div>
   </div>
-</section>
-
-<!-- ======================================================= -->
-<section id="limitations">
-  <h2><span class="num">10</span>Limitations</h2>
-  <ul>
-    <li><b>Labels are DFT, not experiment.</b> B3LYP dipoles carry their own error relative to experiment (often a few tenths of a Debye).
-      Our models learn to imitate DFT, so their accuracy is bounded by it.</li>
-    <li><b>Geometry is not free.</b> The geometry features use DFT-optimised coordinates, and the optimisation is the expensive
-      part of the QM9 pipeline. In practice one would use a cheaper geometry (e.g. a force field), which we did not test,
-      so the structure + geometry numbers are an upper bound for that use.</li>
-    <li><b>One conformer per molecule.</b> μ depends on conformation, and QM9 has one. Molecules sharing a 2D graph differ by up to
-      <span data-v="dup_spread"></span> D, which no 2D model can resolve.</li>
-    <li><b>Narrow chemical space.</b> Only H, C, N, O, F and ≤ 9 heavy atoms. We could test extrapolation by just one heavy atom
-      (+7% error for the best model, and a failure for the linear model); behaviour on drug-sized molecules is untested and out of scope.
-      New ring scaffolds cost the flexible models about 15–18%.</li>
-    <li><b>A feature quirk.</b> The <code>comp_nheavy</code> input counts atoms left after RDKit's <code>RemoveHs</code>, which keeps a few
-      stereo-relevant hydrogens; it overcounts for 1.2% of molecules. It is a valid but slightly odd input; the size split and every
-      analysis use the true heavy-atom count.</li>
-    <li><b>Data cleaning.</b> 1.4% of molecules were dropped as unparseable (slightly lower μ on average), and QM9's official
-      list of ~3k geometry-inconsistent molecules was not applied.</li>
-    <li><b>Compute-driven shortcuts.</b> Tuning used a 15k subsample with small grids; SVR was fit on 20k molecules only; k-NN, SVR,
-      Lasso, the MLP and the random forest were run on one seed (Ridge, the tree, gradient boosting and the baselines on three). The ranking among the top non-linear models is therefore less certain than
-      the large gaps (baseline vs model, 2D vs geometry).</li>
-    <li><b>No causal claim.</b> Feature importance shows what the model uses to predict, not what makes a molecule polar.</li>
-  </ul>
+  <div class="plot" id="plot-robust" style="min-height:380px"></div>
+  <p class="figcap">Test MAE on each split. Fair comparisons: <i>scaffold</i> vs <i>random (ring-only)</i>, and <i>train ≤ 8 → 9</i> vs <i>size control</i>.
+    More models are in the legend: click to show them.</p>
+  <details class="more"><summary>Full robustness table</summary>
+    <div class="more-body"><div class="tablewrap"><table id="tbl-robust"></table></div></div>
+  </details>
+  <details class="more"><summary>Why the linear model fails on larger molecules</summary>
+    <div class="more-body prose" id="robust-text">
+      <p><b>Scaffolds.</b> Holding out whole ring scaffolds raises the MAE of gradient boosting by 18%, the random forest by 17% and the
+        tree by 14%, but Ridge by only 3%: flexible models partly rely on patterns specific to scaffolds they have seen. On unseen
+        scaffolds gradient boosting with geometry (0.39 D) still beats Ridge (0.57 D) and any structure-only model (≥ 0.60 D), so the
+        random-split numbers are optimistic by about a sixth, but the conclusions hold.</p>
+      <p><b>Size.</b> Gradient boosting reaches 0.450 D vs 0.420 D for a size-matched random control (random forest +4%, tree +6%,
+        structure-only models +1–2%). Ridge with full features jumps from 0.58 to <b>1.92 D</b>, over-predicting every 9-atom molecule by
+        +1.8 D. The cause is one feature: the 9th-largest Coulomb-matrix eigenvalue comes from a hydrogen in any molecule with ≤ 8 heavy
+        atoms, but from a heavy atom in a 9-atom molecule, so 99.8% of test molecules fall outside the training range. A linear model
+        multiplies that value by its coefficient; a tree only asks “above the last threshold?”, so it stays within the training targets.
+        Interpolation is safe; extrapolation is not.</p>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================= -->
 <section id="conclusion">
-  <h2><span class="num">11</span>Conclusion</h2>
-  <div id="conclusion-text">
-    <ol>
-      <li><b>Yes, within QM9's scope, the DFT dipole can be predicted from structure.</b> Gradient boosting with structure + geometry
-        features reaches a test MAE of <b>0.34 D</b> (R² 0.88), 71% below the mean baseline and 66% below linear regression on atom counts.
-        78% of molecules are within 0.5 D. Without any 3D information, the best structure-only model reaches 0.54 D.</li>
-      <li><b>Representation matters more than the model.</b> Changing the features (2D → + geometry) improves the best models by about
-        0.2 D; changing among the three best models moves the MAE by 0.02 D. Within the geometry, two physics-motivated
-        dipole estimates (charges × positions) do almost all of the work.</li>
-      <li><b>The models generalise, with a cost.</b> Unseen ring scaffolds raise the error of the flexible models by about a sixth.
-        Molecules one heavy atom larger than any in training raise it by 7% for gradient boosting, but break a linear model whose features
-        leave their training range.</li>
-      <li><b>Known failure modes.</b> Charged / zwitterionic molecules (errors of several Debye), symmetric molecules (always over-predicted),
-        and very polar molecules (under-predicted): predictions are pulled toward the mean.</li>
-    </ol>
-    <p><b>What this does not show.</b> It does not show that these models would work for experimental dipoles, larger molecules or cheaper
-      (non-DFT) geometries. Feature importance shows what the models use to predict, not what makes molecules polar.</p>
-    <p><b>Next steps.</b> (1) Replace DFT geometries with force-field geometries to test the realistic “skip all of DFT” claim.
-      (2) Add features for charge separation (distance between formally charged atoms) to target the worst failures.
-      (3) Predict the dipole <i>vector</i> rather than its magnitude, which would also avoid the one-sided errors near zero.</p>
+  <div class="sec-head"><span class="num">9</span><div><h2>Conclusion</h2>
+    <p class="takeaway">Within QM9's scope, yes: the DFT dipole can be predicted from structure, to about a third of a Debye.</p></div></div>
+  <div class="concl" id="conclusion-text">
+    <div class="c-item"><span>1</span><div><b>Predictable.</b> Gradient boosting with geometry: MAE <b>0.34 D</b>, R² 0.88, 71% below the mean
+      baseline. Without any 3D information the best is 0.54 D.</div></div>
+    <div class="c-item"><span>2</span><div><b>Representation over model.</b> Changing features moves error by ~0.2 D; changing among the best models, by 0.02 D.
+      Two charge × position features do most of the work.</div></div>
+    <div class="c-item"><span>3</span><div><b>Generalises, at a cost.</b> New scaffolds: about +⅙ error. One heavy atom larger: +7% for boosting,
+      but a linear model breaks.</div></div>
+    <div class="c-item"><span>4</span><div><b>Known failures.</b> Charged molecules (errors of several Debye), symmetric molecules (over-predicted),
+      very polar molecules (under-predicted).</div></div>
   </div>
+  <div class="two next">
+    <div><h4>What this does not show</h4><p>That the models work for experimental dipoles, larger molecules or cheaper (non-DFT) geometries.
+      Feature importance shows what the models use, not what makes molecules polar.</p></div>
+    <div><h4>Next steps</h4><ol class="tight"><li>Use force-field geometries to test the realistic “skip all of DFT” claim.</li>
+      <li>Add charge-separation features to target the worst failures.</li><li>Predict the dipole <i>vector</i>, avoiding one-sided errors near zero.</li></ol></div>
+  </div>
+
+  <h3 id="limitations">Limitations</h3>
+  <div class="limits">
+    <div><b>DFT labels, not experiment</b><p>B3LYP dipoles have their own error vs experiment; our accuracy is bounded by it.</p></div>
+    <div><b>Geometry is not free</b><p>Features use DFT-optimised coordinates; cheaper geometries were not tested, so these numbers are an upper bound.</p></div>
+    <div><b>One conformer</b><p>Molecules sharing a 2D graph differ by up to <span data-v="dup_spread"></span> D, which no 2D model can resolve.</p></div>
+    <div><b>Narrow chemistry</b><p>Only H, C, N, O, F and ≤ 9 heavy atoms; extrapolation tested by just one atom.</p></div>
+    <div><b>Data cleaning</b><p>1.4% unparseable molecules dropped; QM9's list of ~3k inconsistent geometries not applied.</p></div>
+    <div><b>Compute shortcuts</b><p>Tuning on a 15k subsample; SVR on 20k; five models on one seed only.</p></div>
+  </div>
+  <details class="more"><summary>More on limitations</summary>
+    <div class="more-body prose">
+      <ul class="tight">
+        <li><b>A feature quirk.</b> <code>comp_nheavy</code> counts atoms left after RDKit's <code>RemoveHs</code>, which keeps a few
+          stereo-relevant hydrogens; it overcounts for 1.2% of molecules. The size split and every analysis use the true heavy-atom count.</li>
+        <li><b>Seeds.</b> k-NN, SVR, Lasso, the MLP and the random forest ran on one seed (Ridge, the tree, gradient boosting and the baselines on three),
+          so the ranking among top non-linear models is less certain than the large gaps.</li>
+        <li><b>No causal claim.</b> Feature importance shows what the model uses to predict, not what makes a molecule polar.</li>
+      </ul>
+    </div>
+  </details>
 </section>
 
 <!-- ======================================================= -->
 <section id="reproduce">
-  <h2><span class="num">12</span>Reproduce</h2>
-  <p class="lead-sub">Every number on this page comes from the scripts in the repository; full details are in its README.</p>
+  <div class="sec-head"><span class="num">10</span><div><h2>Reproduce</h2>
+    <p class="takeaway">Every number on this page comes from the scripts in the repository.</p></div></div>
 <pre><code>git clone https://github.com/RandomArtist22/qm9-dipole-prediction && cd qm9-dipole-prediction
 python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
-# data (44.8 MB, public): MoleculeNet copy of QM9
-mkdir -p data/raw && cd data/raw
+mkdir -p data/raw && cd data/raw      # data: 44.8 MB, public MoleculeNet copy of QM9
 curl -LO https://deepchemdata.s3-us-west-1.amazonaws.com/datasets/molnet_publish/qm9.zip
 sha256sum -c SHA256SUMS && unzip qm9.zip && cd ../../src
 python build_dataset.py        # features + data_quality.json         (~2 min)
 python make_splits.py          # all splits, saved before any model   (seconds)
-bash run_all.sh                # tuning + test evaluation, every split (~1.5 h on 28 cores)
+bash run_all.sh                # tuning + test evaluation             (~1.5 h on 28 cores)
 python extra_experiments.py    # learning curve, permutation importance
 python analyze.py              # tables, CIs, figures, site data
 python export_3d.py            # 3D structures for the viewer</code></pre>
-  <ul class="tight">
-    <li>Exact splits: <code>data/splits/splits.csv.gz</code> (one column per split; seeds in <code>src/config.py</code>).</li>
-    <li>Every run's chosen hyper-parameters, CV table and test scores: <code>results/metrics.csv</code>, test predictions in <code>results/predictions/</code>.</li>
-    <li>Notebooks: <code>notebooks/01_data_exploration.ipynb</code>, <code>notebooks/02_results_walkthrough.ipynb</code>.</li>
-  </ul>
-  <h3>Team, AI use and citations</h3>
-  <p><b>Team:</b> P Sai Ramcharan Reddy (25110220) and Vasu Garg (25110342).</p>
-  <p><b>AI use:</b> Claude Code (Anthropic) was used to help write and debug code, run experiments, and draft the website and README text.</p>
-  <p><b>Citations:</b> Ramakrishnan, Dral, Rupp, von Lilienfeld, <i>Quantum chemistry structures and properties of 134 kilo
-    molecules</i>, Sci. Data 1, 140022 (2014) · Ruddigkeit et al., <i>Enumeration of 166 billion organic small molecules in the
-    chemical universe database GDB-17</i>, J. Chem. Inf. Model. 52, 2864 (2012) · Wu et al., <i>MoleculeNet</i>, Chem. Sci. 9, 513 (2018) ·
-    Rupp et al., Coulomb matrix, PRL 108, 058301 (2012) · Gasteiger &amp; Marsili, Tetrahedron 36, 3219 (1980) ·
-    Bemis &amp; Murcko, J. Med. Chem. 39, 2887 (1996) · scikit-learn (Pedregosa et al., JMLR 2011) · RDKit · Plotly.js · SmilesDrawer (Probst &amp; Reymond 2018) · 3Dmol.js (Rego &amp; Koes 2015) ·
-    an earlier Kaggle-based study, <a href="https://github.com/jilsnshah/molecular_prediction_challange">jilsnshah/molecular_prediction_challange</a>,
-    used for comparison only (no code reused).</p>
+  <details class="more"><summary>Outputs, team, AI use and citations</summary>
+    <div class="more-body prose">
+      <ul class="tight">
+        <li>Exact splits: <code>data/splits/splits.csv.gz</code> (seeds in <code>src/config.py</code>).</li>
+        <li>Hyper-parameters, CV tables and test scores: <code>results/metrics.csv</code>; test predictions in <code>results/predictions/</code>.</li>
+        <li>Notebooks: <code>notebooks/01_data_exploration.ipynb</code>, <code>notebooks/02_results_walkthrough.ipynb</code>.</li>
+      </ul>
+      <p><b>Team:</b> P Sai Ramcharan Reddy (25110220) and Vasu Garg (25110342).</p>
+      <p><b>AI use:</b> Claude Code (Anthropic) was used to help write and debug code, run experiments, and draft the website and README text.</p>
+      <p><b>Citations:</b> NCERT, <i>Chemistry Part I, Textbook for Class XI</i>, Unit 4 “Chemical Bonding and Molecular Structure”, pp. 111–112 (excerpts shown for educational purposes) · Ramakrishnan, Dral, Rupp, von Lilienfeld, <i>Quantum chemistry structures and properties of 134 kilo
+        molecules</i>, Sci. Data 1, 140022 (2014) · Ruddigkeit et al., <i>Enumeration of 166 billion organic small molecules in the
+        chemical universe database GDB-17</i>, J. Chem. Inf. Model. 52, 2864 (2012) · Wu et al., <i>MoleculeNet</i>, Chem. Sci. 9, 513 (2018) ·
+        Rupp et al., Coulomb matrix, PRL 108, 058301 (2012) · Gasteiger &amp; Marsili, Tetrahedron 36, 3219 (1980) ·
+        Bemis &amp; Murcko, J. Med. Chem. 39, 2887 (1996) · scikit-learn (Pedregosa et al., JMLR 2011) · RDKit · Plotly.js · SmilesDrawer (Probst &amp; Reymond 2018) · 3Dmol.js (Rego &amp; Koes 2015) ·
+        an earlier Kaggle-based study, <a href="https://github.com/jilsnshah/molecular_prediction_challange">jilsnshah/molecular_prediction_challange</a>,
+        used for comparison only (no code reused).</p>
+    </div>
+  </details>
 </section>
 </main>
 <footer>ES 335 Machine Learning · IIT Gandhinagar · 2026</footer>
-<script src="app.js?v=7"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>

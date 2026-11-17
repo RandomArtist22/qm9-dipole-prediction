@@ -24,13 +24,32 @@
   });
 
   // ---------------- nav highlight ----------------
-  const links = $$("#nav a");
+  const links = $$("#nav a:not(.brand)");
   const obs = new IntersectionObserver((ents) => {
     ents.forEach((e) => {
-      if (e.isIntersecting) links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + e.target.id));
+      // sections without their own nav link (e.g. Reproduce) keep the previous highlight
+      if (e.isIntersecting && links.some((a) => a.getAttribute("href") === "#" + e.target.id))
+      {
+        links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + e.target.id));
+        // on narrow screens the nav scrolls sideways: keep the active link visible
+        const act = links.find((a) => a.classList.contains("active")), bar = $("#nav");
+        if (act && bar.scrollWidth > bar.clientWidth) bar.scrollTo({ left: act.offsetLeft - bar.clientWidth / 2 + act.offsetWidth / 2 });
+      }
     });
   }, { rootMargin: "-40% 0px -55% 0px" });
   $$("section[id]").forEach((s) => obs.observe(s));
+
+  // ---------------- tabs (Method section) ----------------
+  $$(".tabs button").forEach((b) => b.addEventListener("click", () => {
+    const bar = b.parentElement;
+    $$("button", bar).forEach((x) => { const on = x === b; x.classList.toggle("on", on); x.setAttribute("aria-selected", on); $("#" + x.dataset.tab).hidden = !on; });
+  }));
+
+  // Plotly sizes charts to their container; a chart revealed later (details/tab) needs a resize
+  document.addEventListener("toggle", (e) => {
+    if (e.target.matches && e.target.matches("details") && e.target.open)
+      $$(".js-plotly-plot", e.target).forEach((p) => Plotly.Plots.resize(p));
+  }, true);
 
   function baseLayout(extra = {}) {
     return Object.assign({
@@ -104,9 +123,9 @@
     mk("composition", "baseline", css("--cbase"));
     mk("2d", "structure only (2D)", css("--c2d"));
     mk("full", "structure + geometry", css("--cfull"));
-    const t = { mae: "test MAE (Debye) — lower is better", rmse: "test RMSE (Debye) — lower is better", r2: "test R² — higher is better" }[metric];
-    Plotly.react("plot-models", tr, baseLayout({ barmode: "group", height: 440, margin: { l: 170, r: 16, t: 10, b: 70 },
-      xaxis: { title: t, gridcolor: css("--line") }, yaxis: { categoryorder: "array", categoryarray: lab, gridcolor: css("--line") } }), CFG);
+    const t = { mae: "test MAE (D), lower is better", rmse: "test RMSE (D), lower is better", r2: "test R², higher is better" }[metric];
+    Plotly.react("plot-models", tr, baseLayout({ barmode: "group", height: 420, showlegend: false, margin: { l: 10, r: 16, t: 10, b: 50 },
+      xaxis: { title: t, gridcolor: css("--line") }, yaxis: { categoryorder: "array", categoryarray: lab, gridcolor: css("--line"), automargin: true } }), CFG);
   }
   $$("#metric-seg button").forEach((b) => b.addEventListener("click", () => {
     $$("#metric-seg button").forEach((x) => x.classList.toggle("on", x === b));
@@ -136,16 +155,17 @@
     const order = ["composition", "2d", "2d_geo", "2d_phys", "full"];
     const tr = ["ridge", "hgb"].map((m, i) => {
       const pts = order.map((fs) => S.ablation.find((a) => a.model === m && a.featureset === fs));
-      return { type: "bar", name: ML()[m], x: order.map((fs) => S.featureset_labels[fs]), y: pts.map((p) => (p ? p.test_mae : null)),
-        marker: { color: i ? css("--cfull") : css("--c2d") }, hovertemplate: "%{x}<br>MAE %{y:.3f}<extra>" + ML()[m] + "</extra>" };
+      const short = { composition: "atom<br>counts", "2d": "2D<br>graph", "2d_geo": "2D +<br>shape", "2d_phys": "2D + dipole<br>estimates", full: "all<br>features" };
+      return { type: "bar", name: ML()[m], x: order.map((fs) => short[fs]), customdata: order.map((fs) => S.featureset_labels[fs]), y: pts.map((p) => (p ? p.test_mae : null)),
+        marker: { color: i ? css("--cfull") : css("--c2d") }, hovertemplate: "%{customdata}<br>MAE %{y:.3f}<extra>" + ML()[m] + "</extra>" };
     });
-    Plotly.react("plot-ablation", tr, baseLayout({ barmode: "group", height: 340, margin: { l: 50, r: 10, t: 10, b: 110 },
-      yaxis: { title: "test MAE (D)", gridcolor: css("--line") }, xaxis: { tickangle: -25 }, legend: { orientation: "h", y: 1.12 } }), CFG);
+    Plotly.react("plot-ablation", tr, baseLayout({ barmode: "group", height: 340, margin: { l: 55, r: 10, t: 10, b: 60 },
+      yaxis: { title: "test MAE (D)", gridcolor: css("--line") }, xaxis: { tickangle: 0, automargin: true }, legend: { orientation: "h", y: 1.12 } }), CFG);
     const gi = S.group_importance.slice().sort((a, b) => a.delta_mae_mean - b.delta_mae_mean);
     Plotly.react("plot-importance", [{ type: "bar", orientation: "h", y: gi.map((g) => g.label), x: gi.map((g) => g.delta_mae_mean),
       error_x: { type: "data", array: gi.map((g) => g.delta_mae_std), color: css("--muted") }, marker: { color: css("--cfull") },
       hovertemplate: "%{y}<br>MAE rises by %{x:.3f} D<extra></extra>" }],
-      baseLayout({ height: 340, margin: { l: 200, r: 10, t: 10, b: 50 }, xaxis: { title: "increase in test MAE when shuffled (D)", gridcolor: css("--line") } }), CFG);
+      baseLayout({ height: 340, margin: { l: 10, r: 10, t: 10, b: 50 }, yaxis: { automargin: true }, xaxis: { title: "Δ MAE (D)", gridcolor: css("--line") } }), CFG);
   }
 
   function drawLC() {
@@ -197,16 +217,19 @@
 
   // ---------------- robustness ----------------
   function drawRobust() {
-    const rr = S.robustness.filter((r) => r.featureset !== "2d" || true);
+    const rr = S.robustness;
     const cols = [["random_all", "random (all)"], ["random_ring_only", "random (ring-only)"], ["scaffold", "scaffold split"],
-      ["size_control", "size control (random, same n)"], ["size_le8", "train ≤ 8 → test 9"]];
+      ["size_control", "size control<br>(random, same n)"], ["size_le8", "train ≤ 8<br>→ test 9"]];
     const sel = rr.filter((r) => ["hgb", "rf", "ridge", "linreg_comp", "mean"].includes(r.model));
     const tr = sel.map((r) => ({ type: "bar", name: `${r.model_label}${r.featureset === "composition" ? "" : r.featureset === "full" ? " · +geom" : " · 2D"}`,
       x: cols.map((c) => c[1]), y: cols.map((c) => r[c[0]]),
-      marker: { color: r.featureset === "composition" ? css("--cbase") : r.featureset === "full" ? css("--cfull") : css("--c2d"),
-        opacity: r.model === "hgb" ? 1 : r.model === "rf" ? 0.75 : 0.5 },
+      marker: { color: (r.model === "ridge" && r.featureset === "full") ? css("--bad") : r.featureset === "composition" ? css("--cbase") : r.featureset === "full" ? css("--cfull") : css("--c2d"),
+        opacity: (r.model === "hgb" || (r.model === "ridge" && r.featureset === "full")) ? 1 : r.model === "rf" ? 0.75 : 0.5 },
+      // keep the default view readable: the four series that carry the story; the rest are one legend click away
+      visible: (r.model === "mean" || (r.model === "ridge" && r.featureset === "full") || r.model === "hgb") ? true : "legendonly",
       hovertemplate: "%{x}<br>MAE %{y:.3f}<extra>%{fullData.name}</extra>" }));
-    Plotly.react("plot-robust", tr, baseLayout({ barmode: "group", height: 400, yaxis: { title: "test MAE (D)", gridcolor: css("--line") }, margin: { l: 60, r: 10, t: 10, b: 110 } }), CFG);
+    Plotly.react("plot-robust", tr, baseLayout({ barmode: "group", height: 420, yaxis: { title: "test MAE (D)", gridcolor: css("--line") },
+      xaxis: { automargin: true }, margin: { l: 60, r: 10, t: 10, b: 40 }, legend: { orientation: "h", y: -0.18, title: { text: "click to show/hide: " } } }), CFG);
     let h = `<thead><tr><th>Model</th><th>Features</th><th class="n">random (all)</th><th class="n">random ring-only</th><th class="n">scaffold</th><th class="n">scaffold vs ring-only</th><th class="n">size control</th><th class="n">≤8 → 9</th><th class="n">size vs control</th></tr></thead><tbody>`;
     rr.forEach((r) => {
       const sgn = (v) => (v >= 0 ? "+" : "−") + pct(Math.abs(v));
@@ -308,8 +331,34 @@
     renderMol(heroViewer, id, { arrow: "#ff5f93", zoom: 1.55 });
     heroViewer.spin("y", 0.6);
     const m = EX.molecules.find((q) => q.id === id);
-    if (m) $("#hero-cap").innerHTML = `Test molecule <code style="background:rgba(255,255,255,.1);color:#fff">${m.s}</code>: DFT μ = <b style="color:#fff">${f(m.y, 2)} D</b>, predicted
-      <b style="color:#fff">${f(m.p["full__hgb"], 2)} D</b> with geometry vs ${f(m.p["2d__hgb"], 2)} D without. The arrow is the dipole estimated from charges × positions.`;
+    if (m) $("#hero-cap").innerHTML = `True dipole <b style="color:#fff">${f(m.y, 2)} D</b> · predicted <b style="color:#fff">${f(m.p["full__hgb"], 2)} D</b> with geometry,
+      ${f(m.p["2d__hgb"], 2)} D without. Arrow = dipole estimated from charges × positions.`;
+  }
+
+  // ---------------- 2D structure (SmilesDrawer) ----------------
+  // Note: #mol-svg is an SVG element, which has no `hidden` property, so visibility is toggled on
+  // its HTML wrapper #lab-2d. We draw only while the wrapper is visible so the drawer can measure text.
+  let drawn2d = null;
+  function isDark() {
+    const t = document.documentElement.getAttribute("data-theme");
+    return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function draw2D(id) {
+    const m = EX && EX.molecules.find((q) => q.id === id);
+    const key = id + (isDark() ? ":d" : ":l");
+    if (!m || drawn2d === key) return;
+    const svg = $("#mol-svg");
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (typeof SmilesDrawer === "undefined") { $("#lab-2d").innerHTML = '<p class="muted">2D drawing library failed to load.</p>'; return; }
+    try {
+      const drawer = new SmilesDrawer.SvgDrawer({ width: 320, height: 300, bondThickness: 1.1, padding: 18, compactDrawing: false });
+      SmilesDrawer.parse(m.s, (tree) => {
+        drawer.draw(tree, svg, isDark() ? "dark" : "light", null);
+        svg.removeAttribute("width"); svg.removeAttribute("height"); svg.removeAttribute("style");
+        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+        drawn2d = key;
+      }, (err) => console.warn("SMILES parse failed", m.s, err));
+    } catch (e) { console.warn("2D drawing failed", e); }
   }
 
   function showMol(id, story) {
@@ -320,11 +369,6 @@
     let est = null;
     const st = STRUCT && STRUCT[id];
     if (st) est = Math.hypot(st.d[0], st.d[1], st.d[2]);
-    if (labViewer && labMode === "3d") renderMol(labViewer, id);
-    try {
-      const drawer = new SmilesDrawer.SvgDrawer({ width: 320, height: 300, bondThickness: 1.2 });
-      SmilesDrawer.parse(m.s, (tree) => drawer.draw(tree, "mol-svg", "light", null), () => {});
-    } catch (e) { /* 2D drawing is optional */ }
     setLabMode(labMode);
     const storyEl = $("#lab-story");
     if (currentStory) { storyEl.textContent = currentStory; storyEl.hidden = false; } else storyEl.hidden = true;
@@ -336,7 +380,7 @@
       const p = m.p[exKey(x)], e = p - m.y, w = Math.max(0, p) / vmax * 100;
       const col = Math.abs(e) < 0.5 ? css("--good") : Math.abs(e) > 1.5 ? css("--bad") : css("--c2d");
       return `<div class="predbar"><span>${ML()[x]}</span><span class="track"><span class="fill" style="width:${w}%;background:${col}"></span>
-        <span class="truth" style="left:${m.y / vmax * 100}%"></span></span><span class="num">${f(p, 2)}</span></div>`;
+        <span class="truth" style="left:${m.y / vmax * 100}%"></span></span><span class="num${p < 0 ? " neg" : ""}" ${p < 0 ? 'title="negative: impossible for a magnitude"' : ""}>${f(p, 2)}</span></div>`;
     }).join("");
     $("#lab-body").innerHTML = `
       <div class="vals">
@@ -345,15 +389,22 @@
         <div><div class="k">charge×position est.</div><div class="v">${typeof est === "number" ? f(est, 2) : "–"}</div></div>
       </div>
       <div style="margin:2px 0 6px"><code>${m.s}</code></div>
-      <div class="muted" style="font-size:12.5px;margin-bottom:4px">Every model's prediction (${exFS === "full" ? "structure + geometry" : "structure only"} features, Debye). Black tick = DFT value.</div>
+      <div class="muted" style="font-size:12.5px;margin-bottom:4px">All models (${exFS === "full" ? "+ geometry" : "structure only"}), in Debye. Black tick = true value.</div>
       <div class="predbars">${bars}</div>`;
   }
+  let rendered3d = null;
   function setLabMode(mode) {
     labMode = mode;
     $$("#lab-view button").forEach((b) => b.classList.toggle("on", b.dataset.v === mode));
-    $("#lab-3d").hidden = mode !== "3d"; $("#mol-svg").hidden = mode !== "2d";
-    $(".lab-legend").style.display = mode === "3d" ? "" : "none";
-    if (mode === "3d" && labViewer && selected) { labViewer.resize(); renderMol(labViewer, selected); }
+    $("#lab-3d").hidden = mode !== "3d";
+    $("#lab-2d").hidden = mode !== "2d";
+    $("#lab-legend").hidden = mode !== "3d";
+    if (!selected) return;
+    if (mode === "3d" && labViewer) {
+      labViewer.resize();   // canvas was 0×0 while hidden
+      if (rendered3d !== selected) { renderMol(labViewer, selected); rendered3d = selected; } else labViewer.render();
+    }
+    if (mode === "2d") draw2D(selected);
   }
   $$("#lab-view button").forEach((b) => b.addEventListener("click", () => setLabMode(b.dataset.v)));
   $$("#demo-chips button").forEach((b) => b.addEventListener("click", () => {
