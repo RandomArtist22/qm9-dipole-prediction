@@ -24,7 +24,8 @@
   });
 
   // ---------------- nav highlight ----------------
-  const links = $$("#nav a:not(.brand)");
+  // the mobile top bar and the desktop sidebar both list the sections; highlight the current one in each
+  const links = $$("#nav a.sec-link, .toc a[href^='#']");
   const obs = new IntersectionObserver((ents) => {
     ents.forEach((e) => {
       // sections without their own nav link (e.g. Reproduce) keep the previous highlight
@@ -32,12 +33,22 @@
       {
         links.forEach((a) => a.classList.toggle("active", a.getAttribute("href") === "#" + e.target.id));
         // on narrow screens the nav scrolls sideways: keep the active link visible
-        const act = links.find((a) => a.classList.contains("active")), bar = $("#nav");
+        const bar = $("#nav"), act = $$("a.sec-link.active", bar)[0];
         if (act && bar.scrollWidth > bar.clientWidth) bar.scrollTo({ left: act.offsetLeft - bar.clientWidth / 2 + act.offsetWidth / 2 });
       }
     });
   }, { rootMargin: "-40% 0px -55% 0px" });
   $$("section[id]").forEach((s) => obs.observe(s));
+
+  // ---------------- reading progress (thin line under the top bar) ----------------
+  const prog = $("#progress");
+  let progQueued = false;
+  const setProg = () => {
+    progQueued = false;
+    const max = document.documentElement.scrollHeight - innerHeight;
+    prog.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+  };
+  if (prog) { addEventListener("scroll", () => { if (!progQueued) { progQueued = true; requestAnimationFrame(setProg); } }, { passive: true }); setProg(); }
 
   // ---------------- tabs (Method section) ----------------
   $$(".tabs button").forEach((b) => b.addEventListener("click", () => {
@@ -51,15 +62,33 @@
       window.Plotly && $$(".js-plotly-plot", e.target).forEach((p) => Plotly.Plots.resize(p));
   }, true);
 
+  // Axes, margin and legend are merged per key (not replaced), so a chart that sets its own
+  // xaxis title still keeps automargin + shared styling and its axis title is never clipped.
   function baseLayout(extra = {}) {
-    return Object.assign({
+    const axis = () => ({
+      gridcolor: css("--grid") || css("--line"), zerolinecolor: css("--line"), linecolor: css("--line"),
+      tickfont: { color: css("--muted"), size: 11.5 }, title: { font: { color: css("--muted"), size: 12.5 }, standoff: 10 },
+      automargin: true, ticks: "", showline: false,
+    });
+    const mergeAxis = (base, over) => {
+      if (!over) return base;
+      const out = Object.assign({}, base, over);
+      if (over.title !== undefined) out.title = Object.assign({}, base.title, typeof over.title === "string" ? { text: over.title } : over.title);
+      return out;
+    };
+    const base = {
       paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
       font: { family: "Inter, Arial, sans-serif", size: 12, color: css("--ink") },
-      margin: { l: 60, r: 16, t: 30, b: 50 },
-      xaxis: { gridcolor: css("--line"), zerolinecolor: css("--line") },
-      yaxis: { gridcolor: css("--line"), zerolinecolor: css("--line") },
-      legend: { orientation: "h", y: -0.2 },
-    }, extra);
+      margin: { l: 60, r: 16, t: 24, b: 50 },
+      legend: { orientation: "h", y: -0.2, font: { color: css("--muted") } },
+      hoverlabel: { bgcolor: css("--surface"), bordercolor: css("--line"), font: { color: css("--ink"), family: "Inter, Arial, sans-serif" } },
+    };
+    const out = Object.assign({}, base, extra);
+    out.margin = Object.assign({}, base.margin, extra.margin);
+    out.legend = Object.assign({}, base.legend, extra.legend);
+    out.xaxis = mergeAxis(axis(), extra.xaxis);
+    out.yaxis = mergeAxis(axis(), extra.yaxis);
+    return out;
   }
   const CFG = { displaylogo: false, responsive: true, modeBarButtonsToRemove: ["lasso2d", "select2d"] };
   // A fixed layout.height does not size the (overflow:hidden) .plot box, so legends and axis titles
@@ -100,7 +129,7 @@
   function drawHist() {
     const h = S.mu_histogram, x = h.map((_, i) => i * 0.25 + 0.125);
     plotReact("plot-hist", [{ type: "bar", x, y: h, marker: { color: css("--accent") }, hovertemplate: "μ ≈ %{x:.2f} D<br>%{y} molecules<extra></extra>" }],
-      baseLayout({ xaxis: { title: "dipole moment μ (Debye)", gridcolor: css("--line") }, yaxis: { title: "molecules", type: "log", gridcolor: css("--line") }, bargap: 0, height: 300 }), CFG);
+      baseLayout({ xaxis: { title: "dipole moment μ (Debye)" }, yaxis: { title: "molecules", type: "log" }, bargap: 0, height: 300 }), CFG);
   }
 
   // ---------------- model comparison ----------------
@@ -132,7 +161,7 @@
     mk("full", "structure + geometry", css("--cfull"));
     const t = { mae: "test MAE (D), lower is better", rmse: "test RMSE (D), lower is better", r2: "test R², higher is better" }[metric];
     plotReact("plot-models", tr, baseLayout({ barmode: "group", height: 420, showlegend: false, margin: { l: 10, r: 16, t: 10, b: 50 },
-      xaxis: { title: t, gridcolor: css("--line") }, yaxis: { categoryorder: "array", categoryarray: lab, gridcolor: css("--line"), automargin: true } }), CFG);
+      xaxis: { title: t }, yaxis: { categoryorder: "array", categoryarray: lab, automargin: true } }), CFG);
   }
   $$("#metric-seg button").forEach((b) => b.addEventListener("click", () => {
     $$("#metric-seg button").forEach((x) => x.classList.toggle("on", x === b));
@@ -167,12 +196,12 @@
         marker: { color: i ? css("--cfull") : css("--c2d") }, hovertemplate: "%{customdata}<br>MAE %{y:.3f}<extra>" + ML()[m] + "</extra>" };
     });
     plotReact("plot-ablation", tr, baseLayout({ barmode: "group", height: 340, margin: { l: 55, r: 10, t: 10, b: 60 },
-      yaxis: { title: "test MAE (D)", gridcolor: css("--line") }, xaxis: { tickangle: 0, automargin: true }, legend: { orientation: "h", y: 1.12 } }), CFG);
+      yaxis: { title: "test MAE (D)" }, xaxis: { tickangle: 0, automargin: true }, legend: { orientation: "h", y: 1.12 } }), CFG);
     const gi = S.group_importance.slice().sort((a, b) => a.delta_mae_mean - b.delta_mae_mean);
     plotReact("plot-importance", [{ type: "bar", orientation: "h", y: gi.map((g) => g.label), x: gi.map((g) => g.delta_mae_mean),
       error_x: { type: "data", array: gi.map((g) => g.delta_mae_std), color: css("--muted") }, marker: { color: css("--cfull") },
       hovertemplate: "%{y}<br>MAE rises by %{x:.3f} D<extra></extra>" }],
-      baseLayout({ height: 340, margin: { l: 10, r: 10, t: 10, b: 50 }, yaxis: { automargin: true }, xaxis: { title: "Δ MAE (D)", gridcolor: css("--line") } }), CFG);
+      baseLayout({ height: 340, margin: { l: 10, r: 10, t: 10, b: 50 }, yaxis: { automargin: true }, xaxis: { title: "Δ MAE (D)" } }), CFG);
   }
 
   function drawLC() {
@@ -182,7 +211,7 @@
       tr.push({ x: d.map((r) => r.n_train), y: d.map((r) => r.test_mae), mode: "lines+markers", name: S.featureset_labels[fs] + " · test", line: { color: c } });
       tr.push({ x: d.map((r) => r.n_train), y: d.map((r) => r.train_mae), mode: "lines+markers", name: "train", line: { color: c, dash: "dot" }, opacity: 0.6 });
     });
-    plotReact("plot-lc", tr, baseLayout({ height: 330, xaxis: { type: "log", title: "training molecules", gridcolor: css("--line") }, yaxis: { title: "MAE (D)", gridcolor: css("--line") } }), CFG);
+    plotReact("plot-lc", tr, baseLayout({ height: 330, xaxis: { type: "log", title: "training molecules" }, yaxis: { title: "MAE (D)" } }), CFG);
   }
 
   function tableTests() {
@@ -201,7 +230,7 @@
       { type: "bar", name: "GB structure only", x, y: b.map((r) => r.mae_2d), marker: { color: css("--c2d") } },
       { type: "bar", name: "GB + geometry", x, y: b.map((r) => r.mae), marker: { color: css("--cfull") } },
       { type: "scatter", mode: "lines+markers", name: "mean residual (pred − true), GB + geometry", x, y: b.map((r) => r.mean_resid), yaxis: "y2", line: { color: css("--bad") } },
-    ], baseLayout({ barmode: "group", height: 360, yaxis: { title: "test MAE (D)", gridcolor: css("--line") },
+    ], baseLayout({ barmode: "group", height: 360, yaxis: { title: "test MAE (D)" },
       yaxis2: { title: "mean residual (D)", overlaying: "y", side: "right", zeroline: true, zerolinecolor: css("--bad"), showgrid: false },
       margin: { l: 60, r: 60, t: 10, b: 70 } }), CFG);
   }
@@ -235,7 +264,7 @@
       // keep the default view readable: the four series that carry the story; the rest are one legend click away
       visible: (r.model === "mean" || (r.model === "ridge" && r.featureset === "full") || r.model === "hgb") ? true : "legendonly",
       hovertemplate: "%{x}<br>MAE %{y:.3f}<extra>%{fullData.name}</extra>" }));
-    plotReact("plot-robust", tr, baseLayout({ barmode: "group", height: 420, yaxis: { title: "test MAE (D)", gridcolor: css("--line") },
+    plotReact("plot-robust", tr, baseLayout({ barmode: "group", height: 420, yaxis: { title: "test MAE (D)" },
       xaxis: { automargin: true }, margin: { l: 60, r: 10, t: 10, b: 40 }, legend: { orientation: "h", y: -0.18, title: { text: "click to show/hide: " } } }), CFG);
     let h = `<thead><tr><th>Model</th><th>Features</th><th class="n">random (all)</th><th class="n">random ring-only</th><th class="n">scaffold</th><th class="n">scaffold vs ring-only</th><th class="n">size control</th><th class="n">≤8 → 9</th><th class="n">size vs control</th></tr></thead><tbody>`;
     rr.forEach((r) => {
@@ -326,7 +355,7 @@
       if (m) tr.push({ x: [m.y], y: [m.p[key]], mode: "markers", marker: { size: 14, color: "rgba(0,0,0,0)", line: { color: css("--bad"), width: 2.5 } }, hoverinfo: "skip", showlegend: false });
     }
     plotReact("plot-explorer", tr, baseLayout({ height: 440, showlegend: false, margin: { l: 55, r: 10, t: 10, b: 50 },
-      xaxis: { title: "true μ (D)", range: [0, mx * 1.03], gridcolor: css("--line") }, yaxis: { title: `predicted μ (D) · ${ML()[model]}`, range: [0, mx * 1.03], gridcolor: css("--line") } }), CFG);
+      xaxis: { title: "true μ (D)", range: [0, mx * 1.03] }, yaxis: { title: `predicted μ (D) · ${ML()[model]}`, range: [0, mx * 1.03] } }), CFG);
     const el = $("#plot-explorer");
     if (window.Plotly && !el._bound) {
       el.on("plotly_click", (ev) => { const p = ev.points[0]; if (p && p.customdata) { cancelCloud(); selected = p.customdata; $$("#demo-chips button").forEach((x) => x.classList.toggle("on", x.dataset.id === selected)); const chip = $$("#demo-chips button").find((x) => x.dataset.id === selected); showMol(selected, chip ? chip.dataset.story : null); drawExplorer(); } });
@@ -361,14 +390,15 @@
       return v;
     } catch (e) { console.warn("3D viewer unavailable", e); return null; }
   }
+  const HERO_ID = "gdb_130921";
   function initHero() {
     heroViewer = makeViewer($("#hero-viewer"));
-    if (!heroViewer) { $("#hero-viewer").innerHTML = '<p style="padding:20px;color:#b4bbe0">3D view needs WebGL.</p>'; return; }
-    const id = "gdb_130921";
-    renderMol(heroViewer, id, { arrow: "#ff5f93", zoom: 1.55 });
+    if (!heroViewer) { $("#hero-viewer").innerHTML = '<p class="muted" style="padding:20px">3D view needs WebGL.</p>'; return; }
+    const id = HERO_ID;
+    renderMol(heroViewer, id, { zoom: 1.55 });
     heroViewer.spin("y", 0.6);
     const m = EX.molecules.find((q) => q.id === id);
-    if (m) $("#hero-cap").innerHTML = `True dipole <b style="color:#fff">${f(m.y, 2)} D</b> · predicted <b style="color:#fff">${f(m.p["full__hgb"], 2)} D</b> with geometry,
+    if (m) $("#hero-cap").innerHTML = `True dipole <b>${f(m.y, 2)} D</b> · predicted <b>${f(m.p["full__hgb"], 2)} D</b> with geometry,
       ${f(m.p["2d__hgb"], 2)} D without. Arrow = dipole estimated from charges × positions.`;
   }
 
@@ -522,6 +552,7 @@
     bind(); drawHist(); drawModels(); tableModels(); drawAblation(); drawLC(); tableTests();
     drawBins(); tableGroups(); tableWorst(); drawRobust(); if (EX) drawExplorer();
     if (selected && STRUCT) showMol(selected);
+    if (heroViewer && STRUCT) renderMol(heroViewer, HERO_ID, { zoom: 1.55 });
   }
 
   reveal();

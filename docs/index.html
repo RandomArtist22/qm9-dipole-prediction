@@ -7,20 +7,51 @@
 <meta name="description" content="ES 335 project: predicting DFT dipole moments of small organic molecules (QM9) from structure — baselines, classical models, a geometry ablation, and scaffold / size-extrapolation tests.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2210%22 cy=%2216%22 r=%227%22 fill=%22%232f5bd3%22/%3E%3Ccircle cx=%2223%22 cy=%2216%22 r=%225%22 fill=%22%23d99a06%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=15">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=17">
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.1.7/dist/smiles-drawer.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js"></script>
 </head>
 <body>
 <nav class="top"><div class="inner" id="nav">
-  <a class="brand" href="#top">μ<span>QM9</span></a>
-  <a href="#why">Why</a><a href="#question">Question</a><a href="#data">Data</a><a href="#method">Method</a><a href="#results">Results</a>
-  <a href="#explorer">Explore 3D</a><a href="#errors">Errors</a><a href="#robustness">Robustness</a><a href="#conclusion">Conclusion</a>
-  <button class="theme-toggle" id="theme" aria-label="Toggle colour theme" title="Light / dark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
-</div></nav>
+  <a class="brand" href="#top">μ QM9<span>ES 335</span></a>
+  <a class="sec-link" href="#summary">Summary</a><a class="sec-link" href="#question">Question</a><a class="sec-link" href="#why">Why</a><a class="sec-link" href="#data">Data</a><a class="sec-link" href="#method">Method</a>
+  <a class="sec-link" href="#results">Results</a><a class="sec-link" href="#explorer">Explore 3D</a><a class="sec-link" href="#errors">Errors</a><a class="sec-link" href="#robustness">Robustness</a><a class="sec-link" href="#conclusion">Conclusion</a>
+  <div class="tools">
+    <a href="https://github.com/RandomArtist22/qm9-dipole-prediction">GitHub</a>
+    <button class="theme-toggle" id="theme" aria-label="Toggle colour theme" title="Light / dark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
+  </div>
+</div><div class="progress" id="progress" aria-hidden="true"></div></nav>
 
+<div class="layout">
+<aside class="toc" aria-label="Contents">
+  <div class="toc-title">Contents</div>
+  <a href="#summary"><span>·</span>At a glance</a>
+  <div class="toc-part">Background</div>
+  <a href="#question"><span>01</span>The question</a>
+  <a href="#why"><span>02</span>Why this project</a>
+  <a href="#data"><span>03</span>Data</a>
+  <div class="toc-part">Approach</div>
+  <a href="#method"><span>04</span>Method</a>
+  <div class="toc-part">Findings</div>
+  <a href="#results"><span>05</span>Results</a>
+  <a class="sub" href="#ablation">What part of geometry helps</a>
+  <a class="sub" href="#learning-curve">Learning curve</a>
+  <a href="#explorer"><span>06</span>Explore the predictions</a>
+  <a href="#errors"><span>07</span>Where it goes wrong</a>
+  <a href="#robustness"><span>08</span>Robustness</a>
+  <div class="toc-part">Wrap-up</div>
+  <a href="#conclusion"><span>09</span>Conclusion</a>
+  <a class="sub" href="#limitations">Limitations</a>
+  <a href="#reproduce"><span>10</span>Reproduce</a>
+  <div class="toc-foot">
+    <a href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source on GitHub ↗</a>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</aside>
+
+<div class="content">
 <header class="hero" id="top">
   <div class="hero-inner">
     <div class="hero-text">
@@ -29,29 +60,76 @@
       <p class="lede">We learn the DFT dipole moment of <b>131,970</b> small molecules from their structure, compare ten models,
         and test what 3D geometry adds and where the models break.</p>
       <div class="cta">
-        <a class="btn primary" href="#explorer">Explore the molecules in 3D →</a>
-        <a class="btn ghost" href="#why">Why this project?</a>
+        <a class="btn primary" href="#summary">Read the summary ↓</a>
+        <a class="btn ghost" href="#explorer">Open the 3D explorer</a>
       </div>
-      <div class="byline">P Sai Ramcharan Reddy (25110220) · Vasu Garg (25110342) ·
-        <a id="repo-link" href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source on GitHub</a></div>
+      <div class="byline"><b>P Sai Ramcharan Reddy</b> (25110220) · <b>Vasu Garg</b> (25110342)<br>
+        IIT Gandhinagar · 2026 · <a id="repo-link" href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source on GitHub</a></div>
     </div>
     <figure class="hero-mol">
       <div id="hero-viewer" class="mol3d" role="img" aria-label="Rotating 3D model of a QM9 molecule with its estimated dipole arrow"></div>
       <figcaption><span class="dot"></span><span id="hero-cap">A held-out test molecule with its estimated dipole arrow.</span></figcaption>
     </figure>
   </div>
+</header>
+<main>
+
+<!-- ======================================================= -->
+<section id="summary">
+  <div class="sec-head"><span class="num">At a glance</span><h2>Summary</h2></div>
+  <p class="abstract">We predict the DFT dipole moment μ of <b>131,970</b> small organic molecules (QM9) from their structure, comparing
+    two baselines and eight models on five feature groups. Gradient boosting with 3D-geometry features reaches an average error of
+    <b data-v="best_mae">0.341 D</b> (R² 0.88), <span data-v="best_vs_mean">71%</span> below guessing the mean, and two physics features
+    (charges × positions) carry most of the geometry gain. The models hold up on unseen ring scaffolds and slightly larger molecules,
+    but a linear model breaks when extrapolating, and charged molecules remain the hardest cases.</p>
   <div class="cards">
     <div class="card"><div class="big" data-v="best_mae">–</div><div class="lbl">average error of the best model</div></div>
     <div class="card"><div class="big" data-v="best_vs_mean">–</div><div class="lbl">less error than guessing the average</div></div>
     <div class="card"><div class="big" data-v="geo_gain">–</div><div class="lbl">less error once 3D geometry is added</div></div>
     <div class="card"><div class="big" data-v="size_penalty">–</div><div class="lbl">more error on molecules larger than any seen in training</div></div>
   </div>
-</header>
-<main>
+  <div class="q-cards">
+    <a class="q-card" href="#results"><span class="q-n">Q1</span><b>How much better than a trivial baseline?</b><span class="q-a">→ <span data-v="best_vs_mean"></span> lower error than predicting the mean</span></a>
+    <a class="q-card" href="#ablation"><span class="q-n">Q2</span><b>Does 3D geometry add information beyond the 2D bond graph?</b><span class="q-a">→ yes, <span data-v="geo_gain"></span> lower error</span></a>
+    <a class="q-card" href="#robustness"><span class="q-n">Q3</span><b>Do models work on new ring systems and larger molecules?</b><span class="q-a">→ mostly: +18% and +7% error</span></a>
+  </div>
+</section>
+
+<!-- ======================================================= -->
+<section id="question">
+  <div class="sec-head"><span class="num">01 · Background</span><div><h2>The question</h2>
+    <p class="takeaway">Can the DFT dipole moment μ be predicted from structure, so the expensive property calculation can be skipped when screening molecules?</p></div></div>
+  <div class="facts">
+    <div><span class="k">Unit</span>one molecule (≤ 9 heavy atoms: C, N, O, F + H)</div>
+    <div><span class="k">Target</span>μ, dipole magnitude in Debye (regression)</div>
+    <div><span class="k">Inputs</span>bond graph; optionally 3D coordinates</div>
+  </div>
+  <details class="more"><summary>Scope, inputs and limits of the claim</summary>
+    <div class="more-body two">
+      <div>
+        <h4>What the models may use</h4>
+        <ul class="tight">
+          <li><b>Structure-only models</b> use the bond graph (which atoms, which bonds), known before any quantum calculation.</li>
+          <li><b>Geometry models</b> also use 3D coordinates. In QM9 these are DFT-optimised, so the honest claim is
+            <i>“skip the property calculation given a good geometry”</i>, not “skip DFT”.</li>
+          <li>All other DFT outputs (energies, HOMO/LUMO, polarisability, charges, frequencies) are <b>excluded</b>:
+            they come from the same calculation as the target.</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Limits of the claim</h4>
+        <p>Labels are DFT (B3LYP/6-31G(2df,p)) dipoles of QM9-like molecules, in the gas phase at a single optimised geometry.
+          Results say nothing about experimental dipoles, drug-sized molecules, or solvated or flexible conformers, and a good
+          prediction does not explain <i>why</i> a molecule is polar.</p>
+      </div>
+    </div>
+  </details>
+</section>
+
 
 <!-- ======================================================= -->
 <section id="why">
-  <div class="sec-head"><span class="num">1</span><div><h2>Why this project</h2>
+  <div class="sec-head"><span class="num">02 · Background</span><div><h2>Why this project</h2>
     <p class="takeaway">A rule from school chemistry made this look trivial. <b>It isn't</b>, and that is what made it worth studying.</p></div></div>
 
   <div class="story-row">
@@ -117,44 +195,8 @@
 </section>
 
 <!-- ======================================================= -->
-<section id="question">
-  <div class="sec-head"><span class="num">2</span><div><h2>The question</h2>
-    <p class="takeaway">Can the DFT dipole moment μ be predicted from structure, so the expensive property calculation can be skipped when screening molecules?</p></div></div>
-  <div class="q-cards">
-    <a class="q-card" href="#results"><span class="q-n">Q1</span><b>How much better than a trivial baseline?</b><span class="q-a">→ <span data-v="best_vs_mean"></span> lower error than predicting the mean</span></a>
-    <a class="q-card" href="#ablation"><span class="q-n">Q2</span><b>Does 3D geometry add information beyond the 2D bond graph?</b><span class="q-a">→ yes, <span data-v="geo_gain"></span> lower error</span></a>
-    <a class="q-card" href="#robustness"><span class="q-n">Q3</span><b>Do models work on new ring systems and larger molecules?</b><span class="q-a">→ mostly: +18% and +7% error</span></a>
-  </div>
-  <div class="facts">
-    <div><span class="k">Unit</span>one molecule (≤ 9 heavy atoms: C, N, O, F + H)</div>
-    <div><span class="k">Target</span>μ, dipole magnitude in Debye (regression)</div>
-    <div><span class="k">Inputs</span>bond graph; optionally 3D coordinates</div>
-  </div>
-  <details class="more"><summary>Scope, inputs and limits of the claim</summary>
-    <div class="more-body two">
-      <div>
-        <h4>What the models may use</h4>
-        <ul class="tight">
-          <li><b>Structure-only models</b> use the bond graph (which atoms, which bonds), known before any quantum calculation.</li>
-          <li><b>Geometry models</b> also use 3D coordinates. In QM9 these are DFT-optimised, so the honest claim is
-            <i>“skip the property calculation given a good geometry”</i>, not “skip DFT”.</li>
-          <li>All other DFT outputs (energies, HOMO/LUMO, polarisability, charges, frequencies) are <b>excluded</b>:
-            they come from the same calculation as the target.</li>
-        </ul>
-      </div>
-      <div>
-        <h4>Limits of the claim</h4>
-        <p>Labels are DFT (B3LYP/6-31G(2df,p)) dipoles of QM9-like molecules, in the gas phase at a single optimised geometry.
-          Results say nothing about experimental dipoles, drug-sized molecules, or solvated or flexible conformers, and a good
-          prediction does not explain <i>why</i> a molecule is polar.</p>
-      </div>
-    </div>
-  </details>
-</section>
-
-<!-- ======================================================= -->
 <section id="data">
-  <div class="sec-head"><span class="num">3</span><div><h2>Data</h2>
+  <div class="sec-head"><span class="num">03 · Background</span><div><h2>Data</h2>
     <p class="takeaway">QM9: 134k small organic molecules (up to 9 heavy atoms), each with a DFT-computed dipole moment.</p></div></div>
   <div class="tiles">
     <div class="tile"><div class="v" data-v="n_sdf">–</div><div class="k">molecules in the file</div></div>
@@ -197,7 +239,7 @@
 
 <!-- ======================================================= -->
 <section id="method">
-  <div class="sec-head"><span class="num">4</span><div><h2>Method</h2>
+  <div class="sec-head"><span class="num">04 · Approach</span><div><h2>Method</h2>
     <p class="takeaway">Five feature groups, two baselines and eight models, all tuned on training data only and tested once.</p></div></div>
 
   <div class="tabs" role="tablist" aria-label="Method details">
@@ -292,7 +334,7 @@
 
 <!-- ======================================================= -->
 <section id="results">
-  <div class="sec-head"><span class="num">5</span><div><h2>Results</h2>
+  <div class="sec-head"><span class="num">05 · Findings</span><div><h2>Results</h2>
     <p class="takeaway">Every learned model beats both baselines, and <b>the features matter far more than the choice of model</b>.</p></div></div>
   <div class="findings">
     <div class="finding"><div class="fv">10×</div><div><b>Features beat models</b><p>Adding geometry moves MAE by ~0.2 D; switching among the top three models moves it by ~0.02 D.</p></div></div>
@@ -351,7 +393,7 @@
     </div>
   </details>
 
-  <h3>Learning curve</h3>
+  <h3 id="learning-curve">Learning curve</h3>
   <p class="takeaway sm">Good features are worth far more data: with geometry, <b>1,000</b> molecules match a structure-only model trained on <b>50,000</b>.</p>
   <div class="plot" id="plot-lc"></div>
   <p class="figcap">Gradient boosting on growing training subsets. Solid = test error, dotted = training error.</p>
@@ -370,7 +412,7 @@
 
 <!-- ======================================================= -->
 <section id="explorer">
-  <div class="sec-head"><span class="num">6</span><div><h2>Explore the predictions</h2>
+  <div class="sec-head"><span class="num">06 · Findings</span><div><h2>Explore the predictions</h2>
     <p class="takeaway">Each point is a held-out test molecule (<span data-v="n_explorer"></span> sampled + the 15 worst). Click one to open it in 3D.</p></div></div>
 
   <div class="demo">
@@ -420,7 +462,7 @@
 
 <!-- ======================================================= -->
 <section id="errors">
-  <div class="sec-head"><span class="num">7</span><div><h2>Where the model goes wrong</h2>
+  <div class="sec-head"><span class="num">07 · Findings</span><div><h2>Where the model goes wrong</h2>
     <p class="takeaway">Typical error is small, but the tail is heavy, and predictions are <b>pulled toward the mean</b>.</p></div></div>
   <div class="findings">
     <div class="finding"><div class="fv">78%</div><div><b>Within 0.5 D</b><p>Median error 0.21 D; 94% of molecules are within 1 D.</p></div></div>
@@ -460,7 +502,7 @@
 
 <!-- ======================================================= -->
 <section id="robustness">
-  <div class="sec-head"><span class="num">8</span><div><h2>Robustness</h2>
+  <div class="sec-head"><span class="num">08 · Findings</span><div><h2>Robustness</h2>
     <p class="takeaway">On new ring scaffolds and larger molecules, flexible models lose a little; a linear model can fail badly.</p></div></div>
   <div class="findings">
     <div class="finding"><div class="fv">+18%</div><div><b>Unseen ring scaffolds</b><p>Gradient boosting 0.334 → 0.393 D vs its fair control. Ranking unchanged.</p></div></div>
@@ -491,7 +533,7 @@
 
 <!-- ======================================================= -->
 <section id="conclusion">
-  <div class="sec-head"><span class="num">9</span><div><h2>Conclusion</h2>
+  <div class="sec-head"><span class="num">09 · Wrap-up</span><div><h2>Conclusion</h2>
     <p class="takeaway">Within QM9's scope, yes: the DFT dipole can be predicted from structure, to about a third of a Debye.</p></div></div>
   <div class="concl" id="conclusion-text">
     <div class="c-item"><span>1</span><div><b>Predictable.</b> Gradient boosting with geometry: MAE <b>0.34 D</b>, R² 0.88, 71% below the mean
@@ -534,7 +576,7 @@
 
 <!-- ======================================================= -->
 <section id="reproduce">
-  <div class="sec-head"><span class="num">10</span><div><h2>Reproduce</h2>
+  <div class="sec-head"><span class="num">10 · Wrap-up</span><div><h2>Reproduce</h2>
     <p class="takeaway">Every number on this page comes from the scripts in the repository.</p></div></div>
 <pre><code>git clone https://github.com/RandomArtist22/qm9-dipole-prediction && cd qm9-dipole-prediction
 python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
@@ -568,7 +610,9 @@ python export_3d.py            # 3D structures for the viewer</code></pre>
 </section>
 </main>
 <footer>ES 335 Machine Learning · IIT Gandhinagar · 2026</footer>
-<script src="sandbox.js?v=15"></script>
-<script src="app.js?v=15"></script>
+</div><!-- /content -->
+</div><!-- /layout -->
+<script src="sandbox.js?v=17"></script>
+<script src="app.js?v=17"></script>
 </body>
 </html>
