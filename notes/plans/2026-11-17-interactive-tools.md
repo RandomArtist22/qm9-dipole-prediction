@@ -17,7 +17,7 @@
 - No console errors or warnings after interacting with every new control.
 - `prefers-reduced-motion: reduce` → animations jump to their end state.
 - Sandbox uses the same rule the site tested on QM9: bond dipole (D) = 1.34 × Δχ(Pauling) × bond length (Å); resultant = vector sum.
-- Do not commit; the user commits on request. Bump `?v=` on `style.css`, `app.js` and the new `sandbox.js` when done.
+- Commit each task on `main` (user chose this); never push. Bump `?v=` on `style.css`, `app.js` and the new `sandbox.js` when done.
 
 ## Review Focus
 
@@ -61,10 +61,10 @@ Geometry: bent → resultant = n·μb·cos(θ/2) with n=2. Pyramidal (θ = X–N
 
 ```js
 test("bond dipole uses 1.34·Δχ·length", () => approx(bondDipole("H2O"), 1.34 * 1.24 * 0.958, 1e-9));
-test("water at 104.5° ≈ 1.95 D", () => approx(resultant("H2O", 104.5), 1.953, 0.01));
+test("water at 104.5° ≈ 1.95 D", () => approx(resultant("H2O", 104.5), 1.949, 0.005));
 test("linear molecules cancel", () => { approx(resultant("CO2", 180), 0, 1e-9); approx(resultant("BeF2", 180), 0, 1e-9); });
 test("bending CO2 makes it polar", () => assert.ok(resultant("CO2", 120) > 1));
-test("NF3 rule overshoots ~10x", () => { approx(resultant("NF3", 102.2), 2.29, 0.03); assert.ok(resultant("NF3", 102.2) > 5 * PRESETS.NF3.measured); });
+test("NF3 rule overshoots ~10x", () => { approx(resultant("NF3", 102.2), 2.263, 0.005); assert.ok(resultant("NF3", 102.2) > 5 * PRESETS.NF3.measured); });
 test("NH3 rule ≈ 1.29 D", () => approx(resultant("NH3", 106.7), 1.287, 0.02));
 test("planar pyramidal = 0", () => approx(resultant("NH3", 120), 0, 1e-9));
 test("clampAngle respects preset range", () => { assert.equal(clampAngle("NH3", 150), 120); assert.equal(clampAngle("H2O", 60), 90); });
@@ -91,7 +91,7 @@ Behaviour: preset chips (H₂O, CO₂, BeF₂, NH₃, NF₃; default H₂O); ran
 
 - [ ] **Step 1:** Add markup + script tag; implement `mountSandbox`; call it from `sandbox.js` on `DOMContentLoaded` if `#sandbox` exists.
 - [ ] **Step 2: Verify in browser** (Playwright `browser_evaluate` at 1366 and 375 width):
-  - click each chip → readout matches `resultant(key, default angle)` to 2 dp; H₂O shows `1.95`, NF₃ shows `2.29` and the NF₃ note.
+  - click each chip → readout matches `resultant(key, default angle)` to 2 dp; H₂O shows `1.95`, NF₃ shows `2.26` and the NF₃ note.
   - set slider to max on CO₂ → readout `0.00 D`; resultant arrow element hidden (`display:none` or zero length).
   - choose H₂O, set slider 170, click NH₃ → slider value 106.7 (preset default), no `NaN` anywhere in `#sandbox` text.
   - `document.documentElement.scrollWidth === clientWidth` at 375px; console has 0 errors/warnings.
@@ -159,4 +159,4 @@ Values (from spec): spacing scale tokens `--s1:4px --s2:8px --s3:12px --s4:16px 
 - [ ] Run `node --test notes/tests/sandbox.test.js` → pass.
 - [ ] In the browser (1366, then 375; light, then dark): all 8 Plotly plots render with no clipped text; 5 tables populated; no unbound `[data-v]`; 2D/3D toggle works for all 4 demo molecules; Method tabs switch; sandbox, stepper and cloud checks from Tasks 2–4 still pass; console 0 errors/warnings.
 - [ ] Emulate `prefers-reduced-motion: reduce` (Playwright `browser_emulate_media`) → cloud ▶ jumps to end state, stepper marker has no transition.
-- [ ] Bump `?v=` on `style.css`, `app.js`, `sandbox.js`; report to user; offer commit + push.
+- [ ] Bump `?v=` on `style.css`, `app.js`, `sandbox.js`; report to user; offer push.
