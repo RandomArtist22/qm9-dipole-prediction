@@ -269,35 +269,134 @@
       xaxis: { title: "true μ (D)", range: [0, mx * 1.03], gridcolor: css("--line") }, yaxis: { title: `predicted μ (D) · ${ML()[model]}`, range: [0, mx * 1.03], gridcolor: css("--line") } }), CFG);
     const el = $("#plot-explorer");
     if (!el._bound) {
-      el.on("plotly_click", (ev) => { const p = ev.points[0]; if (p && p.customdata) { selected = p.customdata; showMol(selected); drawExplorer(); } });
+      el.on("plotly_click", (ev) => { const p = ev.points[0]; if (p && p.customdata) { selected = p.customdata; $$("#demo-chips button").forEach((x) => x.classList.toggle("on", x.dataset.id === selected)); const chip = $$("#demo-chips button").find((x) => x.dataset.id === selected); showMol(selected, chip ? chip.dataset.story : null); drawExplorer(); } });
       el._bound = true;
     }
   }
-  function showMol(id) {
-    const m = EX.molecules.find((q) => q.id === id); if (!m) return;
-    const models = ["mean", "linreg_comp", "ridge", "lasso", "knn", "tree", "svr", "mlp", "rf", "hgb"].filter((x) => m.p[exKey(x)] !== undefined);
-    let rows = models.map((x) => {
-      const p = m.p[exKey(x)], e = p - m.y;
-      return `<tr><td>${ML()[x]}</td><td class="n">${f(p, 2)}</td><td class="n" style="color:${Math.abs(e) < 0.5 ? css("--good") : Math.abs(e) > 1.5 ? css("--bad") : "inherit"}">${e >= 0 ? "+" : ""}${f(e, 2)}</td></tr>`;
-    }).join("");
-    $("#ex-panel").innerHTML = `<h4>${m.id} <span class="pill">${m.h} heavy atoms</span> ${m.ring ? '<span class="pill">ring</span>' : '<span class="pill">acyclic</span>'}</h4>
-      <svg id="mol-svg" role="img" aria-label="2D structure of ${m.s}"></svg>
-      <div style="margin:6px 0"><code style="word-break:break-all">${m.s}</code></div>
-      <div>True (DFT) μ: <b>${f(m.y, 2)} D</b> · features: ${exFS === "full" ? "+ geometry" : "structure only"}</div>
-      <div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Model</th><th class="n">pred</th><th class="n">error</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  // ---------------- 3D molecule rendering (3Dmol.js) ----------------
+  let STRUCT = null, labViewer = null, heroViewer = null, labMode = "3d", currentStory = null;
+  const ELEM = { H: "#e9edf5", C: "#5b6477", N: "#3a6df0", O: "#e8453c", F: "#35c27d" };
+  function renderMol(viewer, id, opts = {}) {
+    const s = STRUCT && STRUCT[id];
+    if (!viewer || !s) return false;
+    viewer.removeAllModels(); viewer.removeAllShapes();
+    viewer.addModel(s.x, "xyz");
+    viewer.setStyle({}, { stick: { radius: 0.13, colorscheme: { prop: "elem", map: ELEM } },
+      sphere: { scale: 0.27, colorscheme: { prop: "elem", map: ELEM } } });
+    const d = s.d, mag = Math.hypot(d[0], d[1], d[2]);
+    if (mag > 0.02) {
+      const L = Math.min(0.55 * mag, 7.5) / mag;  // arrow length proportional to the estimate (0.55 Å per D, capped)
+      viewer.addArrow({ start: { x: -d[0] * L / 2, y: -d[1] * L / 2, z: -d[2] * L / 2 },
+        end: { x: d[0] * L / 2, y: d[1] * L / 2, z: d[2] * L / 2 }, radius: 0.2, radiusRatio: 2.0, mid: 0.75,
+        color: opts.arrow || css("--arrow") });
+    }
+    viewer.zoomTo(); viewer.zoom(opts.zoom || 1.25); viewer.render();
+    return mag;
+  }
+  function makeViewer(el) {
+    if (typeof $3Dmol === "undefined") return null;
     try {
-      const drawer = new SmilesDrawer.SvgDrawer({ width: 300, height: 190, bondThickness: 1.2 });
+      const v = $3Dmol.createViewer(el, { backgroundAlpha: 0, antialias: true });
+      v.setBackgroundColor(0xffffff, 0);
+      return v;
+    } catch (e) { console.warn("3D viewer unavailable", e); return null; }
+  }
+  function initHero() {
+    heroViewer = makeViewer($("#hero-viewer"));
+    if (!heroViewer) { $("#hero-viewer").innerHTML = '<p style="padding:20px;color:#b4bbe0">3D view needs WebGL.</p>'; return; }
+    const id = "gdb_130921";
+    renderMol(heroViewer, id, { arrow: "#ff5f93", zoom: 1.55 });
+    heroViewer.spin("y", 0.6);
+    const m = EX.molecules.find((q) => q.id === id);
+    if (m) $("#hero-cap").innerHTML = `Test molecule <code style="background:rgba(255,255,255,.1);color:#fff">${m.s}</code>: DFT μ = <b style="color:#fff">${f(m.y, 2)} D</b>, predicted
+      <b style="color:#fff">${f(m.p["full__hgb"], 2)} D</b> with geometry vs ${f(m.p["2d__hgb"], 2)} D without. The arrow is the dipole estimated from charges × positions.`;
+  }
+
+  function showMol(id, story) {
+    const m = EX.molecules.find((q) => q.id === id); if (!m) return;
+    if (story !== undefined) currentStory = story;
+    $("#lab-title").innerHTML = `${m.id} <span class="pill">${m.h} heavy atoms</span> <span class="pill">${m.ring ? "ring" : "acyclic"}</span>`;
+    if (!labViewer) labViewer = makeViewer($("#lab-3d"));
+    let est = null;
+    const st = STRUCT && STRUCT[id];
+    if (st) est = Math.hypot(st.d[0], st.d[1], st.d[2]);
+    if (labViewer && labMode === "3d") renderMol(labViewer, id);
+    try {
+      const drawer = new SmilesDrawer.SvgDrawer({ width: 320, height: 300, bondThickness: 1.2 });
       SmilesDrawer.parse(m.s, (tree) => drawer.draw(tree, "mol-svg", "light", null), () => {});
-    } catch (e) { $("#mol-svg").outerHTML = '<p class="muted">(structure drawing unavailable)</p>'; }
+    } catch (e) { /* 2D drawing is optional */ }
+    setLabMode(labMode);
+    const storyEl = $("#lab-story");
+    if (currentStory) { storyEl.textContent = currentStory; storyEl.hidden = false; } else storyEl.hidden = true;
+
+    const pred = m.p[exKey("hgb")];
+    const models = ["mean", "linreg_comp", "ridge", "lasso", "knn", "tree", "svr", "mlp", "rf", "hgb"].filter((x) => m.p[exKey(x)] !== undefined);
+    const vmax = Math.max(m.y, ...models.map((x) => m.p[exKey(x)]), 1) * 1.08;
+    const bars = models.map((x) => {
+      const p = m.p[exKey(x)], e = p - m.y, w = Math.max(0, p) / vmax * 100;
+      const col = Math.abs(e) < 0.5 ? css("--good") : Math.abs(e) > 1.5 ? css("--bad") : css("--c2d");
+      return `<div class="predbar"><span>${ML()[x]}</span><span class="track"><span class="fill" style="width:${w}%;background:${col}"></span>
+        <span class="truth" style="left:${m.y / vmax * 100}%"></span></span><span class="num">${f(p, 2)}</span></div>`;
+    }).join("");
+    $("#lab-body").innerHTML = `
+      <div class="vals">
+        <div><div class="k">DFT μ (true)</div><div class="v">${f(m.y, 2)}</div></div>
+        <div><div class="k">GB prediction</div><div class="v" style="color:${Math.abs(pred - m.y) < 0.5 ? css("--good") : css("--bad")}">${f(pred, 2)}</div></div>
+        <div><div class="k">charge×position est.</div><div class="v">${typeof est === "number" ? f(est, 2) : "–"}</div></div>
+      </div>
+      <div style="margin:2px 0 6px"><code>${m.s}</code></div>
+      <div class="muted" style="font-size:12.5px;margin-bottom:4px">Every model's prediction (${exFS === "full" ? "structure + geometry" : "structure only"} features, Debye). Black tick = DFT value.</div>
+      <div class="predbars">${bars}</div>`;
+  }
+  function setLabMode(mode) {
+    labMode = mode;
+    $$("#lab-view button").forEach((b) => b.classList.toggle("on", b.dataset.v === mode));
+    $("#lab-3d").hidden = mode !== "3d"; $("#mol-svg").hidden = mode !== "2d";
+    $(".lab-legend").style.display = mode === "3d" ? "" : "none";
+    if (mode === "3d" && labViewer && selected) { labViewer.resize(); renderMol(labViewer, selected); }
+  }
+  $$("#lab-view button").forEach((b) => b.addEventListener("click", () => setLabMode(b.dataset.v)));
+  $$("#demo-chips button").forEach((b) => b.addEventListener("click", () => {
+    $$("#demo-chips button").forEach((x) => x.classList.toggle("on", x === b));
+    selected = b.dataset.id; showMol(selected, b.dataset.story); drawExplorer();
+  }));
+
+  // ---------------- count-up + reveal ----------------
+  function countUp() {
+    $$(".card .big").forEach((el) => {
+      const txt = el.textContent, mm = txt.match(/^([+−-]?)([0-9.]+)(.*)$/);
+      if (!mm) return;
+      const target = parseFloat(mm[2]), dec = (mm[2].split(".")[1] || "").length, t0 = performance.now(), dur = 1100;
+      const step = (t) => {
+        const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+        el.textContent = mm[1] + (target * e).toFixed(dec) + mm[3];
+        if (k < 1) requestAnimationFrame(step); else el.textContent = txt;
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  function reveal() {
+    if (!("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver((ents) => ents.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -8% 0px" });
+    $$("main section > *").forEach((el) => { el.classList.add("reveal"); io.observe(el); });
   }
 
   function drawAll() {
     bind(); drawHist(); drawModels(); tableModels(); drawAblation(); drawLC(); tableTests();
     drawBins(); tableGroups(); tableWorst(); drawRobust(); if (EX) drawExplorer();
+    if (selected && STRUCT) showMol(selected);
   }
 
+  reveal();
   Promise.all([fetch("data/summary.json").then((r) => r.json()), fetch("data/explorer.json").then((r) => r.json())])
-    .then(([s, ex]) => { S = s; EX = ex; exInit(); drawAll(); })
+    .then(([s, ex]) => {
+      S = s; EX = ex; exInit(); drawAll(); countUp();
+      return fetch("data/structures.json").then((r) => r.json()).then((st) => {
+        STRUCT = st; initHero();
+        const first = $("#demo-chips button[data-id='gdb_130921']");
+        if (first && !selected) { first.classList.add("on"); selected = first.dataset.id; showMol(selected, first.dataset.story); drawExplorer(); }
+      });
+    })
     .catch((e) => {
       console.error(e);
       document.querySelector("main").insertAdjacentHTML("afterbegin",

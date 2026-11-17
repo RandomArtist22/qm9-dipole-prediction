@@ -8,9 +8,10 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2210%22 cy=%2216%22 r=%227%22 fill=%22%232f5bd3%22/%3E%3Ccircle cx=%2223%22 cy=%2216%22 r=%225%22 fill=%22%23d99a06%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=4">
+<link rel="stylesheet" href="style.css?v=6">
 <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.35.2/plotly.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.1.7/dist/smiles-drawer.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/3Dmol/2.4.2/3Dmol-min.js"></script>
 </head>
 <body>
 <nav class="top"><div class="inner" id="nav">
@@ -18,18 +19,29 @@
   <a href="#methods">Methods</a><a href="#evaluation">Evaluation</a><a href="#results">Results</a>
   <a href="#explorer">Explore</a><a href="#errors">Errors</a><a href="#robustness">Robustness</a>
   <a href="#limitations">Limitations</a><a href="#conclusion">Conclusion</a><a href="#reproduce">Reproduce</a>
-  <button class="theme-toggle" id="theme" aria-label="Toggle colour theme">◐</button>
+  <button class="theme-toggle" id="theme" aria-label="Toggle colour theme" title="Light / dark"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"/></svg></button>
 </div></nav>
 
-<main>
 <header class="hero">
-  <div class="kicker">ES 335 · Machine Learning · Course project</div>
-  <h1>How well can a molecule's dipole moment be predicted from its structure alone?</h1>
-  <p class="lede">We predict the DFT-computed dipole moment of 131,970 small organic molecules (QM9) without running the
-    property calculation, compare simple baselines against eight learned models, measure what 3D geometry adds over the
-    2D bond graph, and test whether the models still work on unseen ring systems and on larger molecules.</p>
-  <div class="byline">P Sai Ramcharan Reddy (25110220) · Vasu Garg (25110342) ·
-    <a id="repo-link" href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source repository</a></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="kicker">ES 335 · Machine Learning · Course project</div>
+      <h1>Can a molecule's <span class="grad">dipole moment</span> be predicted from its structure alone?</h1>
+      <p class="lede">We predict the DFT-computed dipole moment of <b>131,970</b> small organic molecules (QM9) without running the
+        property calculation. We compare simple baselines with eight learned models, measure what 3D geometry adds to the
+        2D bond graph, and test whether the models still work on unseen ring systems and on larger molecules.</p>
+      <div class="cta">
+        <a class="btn primary" href="#explorer">Explore the molecules in 3D →</a>
+        <a class="btn ghost" href="#question">Read the reasoning</a>
+      </div>
+      <div class="byline">P Sai Ramcharan Reddy (25110220) · Vasu Garg (25110342) ·
+        <a id="repo-link" href="https://github.com/RandomArtist22/qm9-dipole-prediction">Source repository</a></div>
+    </div>
+    <figure class="hero-mol">
+      <div id="hero-viewer" class="mol3d" role="img" aria-label="Rotating 3D model of a QM9 molecule with its estimated dipole arrow"></div>
+      <figcaption><span class="dot"></span><span id="hero-cap">A held-out test molecule. The arrow is the dipole estimated from charges × positions, the feature that does most of the model's work.</span></figcaption>
+    </figure>
+  </div>
   <div class="cards">
     <div class="card"><div class="big" data-v="best_mae">–</div><div class="lbl">test MAE (Debye) of the best model, gradient boosting with structure + geometry features</div></div>
     <div class="card"><div class="big" data-v="best_vs_mean">–</div><div class="lbl">lower error than predicting the training mean (MAE <span data-v="mean_mae"></span> D)</div></div>
@@ -37,6 +49,7 @@
     <div class="card"><div class="big" data-v="size_penalty">–</div><div class="lbl">higher error when the model has never seen a 9-heavy-atom molecule (vs. a size-matched random control)</div></div>
   </div>
 </header>
+<main>
 
 <!-- ======================================================= -->
 <section id="question">
@@ -292,9 +305,20 @@
 
 <!-- ======================================================= -->
 <section id="explorer">
-  <h2><span class="num">7</span>Explore the predictions</h2>
+  <h2><span class="num">7</span>Explore the predictions in 3D</h2>
   <p class="lead-sub">Every point is a held-out test molecule (a random sample of <span data-v="n_explorer"></span>, plus the 15 worst).
-    Change the model or features, filter the molecules, and click a point to inspect it.</p>
+    Click a point to open the molecule in 3D, with the predictions of every model.</p>
+
+  <div class="demo">
+    <div class="demo-head"><span class="pill">Guided demo</span> Four molecules, four lessons. Click one to load it:</div>
+    <div class="demo-chips" id="demo-chips">
+      <button data-id="gdb_3269" data-story="Cycloheptane is symmetric, so its C–H bond dipoles cancel and the DFT dipole is ≈ 0 D. The estimated dipole arrow is almost invisible, and gradient boosting predicts 0.03 D. Look at Ridge and Lasso in the table: they predict a negative dipole (−0.43 D), which is impossible for a magnitude. A linear model does not know the target cannot go below zero."><b>Symmetric</b><span>bond dipoles cancel</span></button>
+      <button data-id="gdb_87278" data-story="A typical neutral molecule with one carbonyl group. Gradient boosting predicts 2.69 D, exactly the DFT value, and every model is within 0.35 D. This is the common case: 78% of test molecules are predicted within 0.5 D."><b>Typical</b><span>predicted almost exactly</span></button>
+      <button data-id="gdb_130921" data-story="A fused triazole with an aldehyde. Without geometry, gradient boosting predicts 3.37 D; with the geometry features it predicts 6.26 D (true 6.24 D). The 2D graph says which polar groups exist; only the 3D arrangement shows whether their dipoles add up or cancel. Here they add up. Switch the features toggle to compare."><b>Geometry wins</b><span>2D: 3.4 D → 3D: 6.3 D</span></button>
+      <button data-id="gdb_130454" data-story="A strongly charge-separated molecule: the true DFT dipole is 21 D, but gradient boosting predicts only 11 D. The charge × position estimate (16 D, the arrow) is actually closer to the truth than the model: molecules this polar are so rare in training that the trees pull the prediction toward typical values. RDKit also reads the structure with a +1 net charge and no balancing negative charge, so even the estimate is unreliable here. Molecules like this make up most of the worst errors."><b>Failure</b><span>charge-separated, 21 D</span></button>
+    </div>
+  </div>
+
   <div class="controls">
     <label>Model <select id="ex-model"></select></label>
     <span>Features</span><div class="seg" id="ex-fs"><button data-f="2d">Structure only</button><button data-f="full" class="on">+ Geometry</button></div>
@@ -304,15 +328,22 @@
   </div>
   <div class="stat-row" id="ex-stats"></div>
   <div class="explorer">
-    <div class="plot" id="plot-explorer" style="min-height:440px"></div>
-    <div class="panel" id="ex-panel">
-      <h4>Click a molecule</h4>
-      <p class="muted">The structure and the predictions of every model for that molecule will appear here.</p>
+    <div class="plot" id="plot-explorer" style="min-height:460px"></div>
+    <div class="panel lab" id="ex-panel">
+      <div class="lab-head"><h4 id="lab-title">Molecule viewer</h4><div class="seg small" id="lab-view"><button data-v="3d" class="on">3D</button><button data-v="2d">2D</button></div></div>
+      <div class="lab-stage">
+        <div id="lab-3d" class="mol3d"></div>
+        <svg id="mol-svg" role="img" aria-label="2D structure" hidden></svg>
+        <div class="lab-legend"><span class="arrow-key"></span> estimated dipole (charges × positions) · drag to rotate, scroll to zoom</div>
+      </div>
+      <div id="lab-story" class="story" hidden></div>
+      <div id="lab-body"><p class="muted">Click a point in the scatter plot, or a demo molecule above.</p></div>
     </div>
   </div>
-  <p class="figcap">Things to try: switch between <i>Structure only</i> and <i>+ Geometry</i> and watch the cloud tighten
-    around the diagonal; set μ from 0 to 0.5 to see that every model over-predicts symmetric molecules; set μ ≥ 8 to see the
-    zwitterions being under-predicted.</p>
+  <p class="figcap">The arrow is the <b>model's physics feature</b>, Σ q<sub>i</sub>r<sub>i</sub> with Gasteiger charges, not the DFT answer:
+    QM9 gives only the dipole's magnitude, not its direction. Arrow length is proportional to the estimate. Also try:
+    switch between <i>Structure only</i> and <i>+ Geometry</i> and watch the cloud tighten around the diagonal; set μ from 0 to 0.5 to see
+    symmetric molecules over-predicted; set μ ≥ 8 to see zwitterions under-predicted.</p>
 </section>
 
 <!-- ======================================================= -->
@@ -342,9 +373,10 @@
     <p><b>The worst errors are charge-separated molecules.</b> 13 of these 15 molecules carry formal charges
       (<code>[NH3+]</code>, <code>[NH2+]</code>, <code>[O-]</code>, <code>[CH+]</code>): zwitterions or strongly charge-separated
       resonance forms. Their dipole is dominated by two full opposite charges a few Ångström apart. One elementary charge
-      separated by 1 Å is already 4.8 D, so a small error in where the charge sits becomes an error of several Debye. Gasteiger charges
-      were designed for neutral molecules and capture this poorly, and charged molecules are rare in training (the
-      “Charged / zwitterion” row above). The two uncharged ones (<code>gdb_129996</code>, <code>gdb_129994</code>) are fused
+      separated by 1 Å is already 4.8 D, so a small error in where the charge sits becomes an error of several Debye. For these 13 molecules
+      the charge × position estimate is unreliable in both directions: it is below the truth for 10 of them, but far too high for others
+      (18.6 D for a molecule whose true dipole is 2.7 D). Charged molecules are also rare in training (the “Charged / zwitterion” row
+      above), so the trees pull their predictions toward typical values. The two uncharged ones (<code>gdb_129996</code>, <code>gdb_129994</code>) are fused
       bicyclic molecules with several ring nitrogens, a rare motif among 9-atom molecules. Outside this table, the group with the
       highest MAE is molecules whose 2D graph occurs more than once (0.72 D): the 2D-only model cannot tell them apart, and
       even with geometry they remain hard.</p>
@@ -445,7 +477,8 @@ python build_dataset.py        # features + data_quality.json         (~2 min)
 python make_splits.py          # all splits, saved before any model   (seconds)
 bash run_all.sh                # tuning + test evaluation, every split (~1.5 h on 28 cores)
 python extra_experiments.py    # learning curve, permutation importance
-python analyze.py              # tables, CIs, figures, site data</code></pre>
+python analyze.py              # tables, CIs, figures, site data
+python export_3d.py            # 3D structures for the viewer</code></pre>
   <ul class="tight">
     <li>Exact splits: <code>data/splits/splits.csv.gz</code> (one column per split; seeds in <code>src/config.py</code>).</li>
     <li>Every run's chosen hyper-parameters, CV table and test scores: <code>results/metrics.csv</code>, test predictions in <code>results/predictions/</code>.</li>
@@ -458,12 +491,12 @@ python analyze.py              # tables, CIs, figures, site data</code></pre>
     molecules</i>, Sci. Data 1, 140022 (2014) · Ruddigkeit et al., <i>Enumeration of 166 billion organic small molecules in the
     chemical universe database GDB-17</i>, J. Chem. Inf. Model. 52, 2864 (2012) · Wu et al., <i>MoleculeNet</i>, Chem. Sci. 9, 513 (2018) ·
     Rupp et al., Coulomb matrix, PRL 108, 058301 (2012) · Gasteiger &amp; Marsili, Tetrahedron 36, 3219 (1980) ·
-    Bemis &amp; Murcko, J. Med. Chem. 39, 2887 (1996) · scikit-learn (Pedregosa et al., JMLR 2011) · RDKit · Plotly.js · SmilesDrawer (Probst &amp; Reymond 2018) ·
+    Bemis &amp; Murcko, J. Med. Chem. 39, 2887 (1996) · scikit-learn (Pedregosa et al., JMLR 2011) · RDKit · Plotly.js · SmilesDrawer (Probst &amp; Reymond 2018) · 3Dmol.js (Rego &amp; Koes 2015) ·
     an earlier Kaggle-based study, <a href="https://github.com/jilsnshah/molecular_prediction_challange">jilsnshah/molecular_prediction_challange</a>,
     used for comparison only (no code reused).</p>
 </section>
 </main>
 <footer>ES 335 Machine Learning · IIT Gandhinagar · 2026</footer>
-<script src="app.js?v=3"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

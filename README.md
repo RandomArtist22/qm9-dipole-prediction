@@ -59,6 +59,7 @@ src/
   run_all.sh             the exact set of runs reported on the site
   extra_experiments.py   learning curve, grouped permutation importance
   analyze.py             metrics table, bootstrap CIs, paired tests, error analysis, figures, site JSON
+  export_3d.py           3D structures + charge-dipole vectors of the explorer molecules (website 3D viewer)
 notebooks/
   01_data_exploration.ipynb   target distribution, sizes, duplicates, quality checks (executed)
   02_results_walkthrough.ipynb all result tables and figures (executed)
@@ -98,6 +99,7 @@ python make_splits.py            # seconds -> data/splits/splits.csv.gz (identic
 bash run_all.sh                  # ~1.5 h on 28 cores; each run is cached in results/runs/
 python extra_experiments.py      # ~10 min: learning curve + permutation importance
 python analyze.py                # tables, CIs, figures, docs/data/*.json
+python export_3d.py              # docs/data/structures.json for the 3D viewer (~30 s)
 
 # 3. notebooks (optional)
 cd ../notebooks && jupyter nbconvert --to notebook --execute --inplace *.ipynb
@@ -150,7 +152,8 @@ Claude Code (Anthropic) was used to help write and debug code, run experiments, 
 * J. Gasteiger, M. Marsili. *Iterative partial equalization of orbital electronegativity.* Tetrahedron 36, 3219 (1980).
 * G. W. Bemis, M. A. Murcko. *The properties of known drugs. 1. Molecular frameworks.* J. Med. Chem. 39, 2887 (1996).
 * F. Pedregosa et al. *Scikit-learn: Machine learning in Python.* JMLR 12, 2825 (2011). · RDKit: Open-source cheminformatics,
-  https://www.rdkit.org · Plotly.js · SmilesDrawer (D. Probst, J.-L. Reymond, J. Chem. Inf. Model. 58, 1 (2018)).
+  https://www.rdkit.org · Plotly.js · SmilesDrawer (D. Probst, J.-L. Reymond, J. Chem. Inf. Model. 58, 1 (2018)) · 3Dmol.js (N. Rego, D. Koes,
+  Bioinformatics 31, 1322 (2015)).
 * jilsnshah, *molecular_prediction_challange* (GitHub) — an earlier Kaggle-based dipole study, used only to compare
   representations (its Coulomb-eigenvalue result motivated our physics-based dipole features). No code was reused.
 * ES 335 lecture notes and handbook (IIT Gandhinagar, 2026) for the methods and evaluation practices.
