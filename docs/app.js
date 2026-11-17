@@ -418,7 +418,8 @@
     $$(".st-dot", host).forEach((d) => d.classList.toggle("vis", +d.dataset.i < stepIdx));
     const mk = $(".st-mark", host); mk.style.left = pos(pred) + "%"; $(".st-pill", host).textContent = f(pred, 2);
     const e = $(".st-err", host);
-    e.style.color = err < 0.5 ? css("--good-text") : err > 1.5 ? css("--bad-text") : css("--warn-text");
+    e.classList.remove("is-good", "is-warn", "is-bad");
+    e.classList.add(err < 0.5 ? "is-good" : err > 1.5 ? "is-bad" : "is-warn");
     e.textContent = `error: |${f(pred, 2)} − ${f(m.y, 2)}| = ${f(err, 2)} D`;
   }
   function playStepper() {
@@ -457,7 +458,7 @@
     $("#lab-body").innerHTML = `
       <div class="vals">
         <div><div class="k">DFT μ (true)</div><div class="v">${f(m.y, 2)}</div></div>
-        <div><div class="k">GB prediction</div><div class="v" style="color:${Math.abs(pred - m.y) < 0.5 ? css("--good") : css("--bad")}">${f(pred, 2)}</div></div>
+        <div><div class="k">GB prediction</div><div class="v ${Math.abs(pred - m.y) < 0.5 ? "is-good" : "is-bad"}">${f(pred, 2)}</div></div>
         <div><div class="k">charge×position est.</div><div class="v">${typeof est === "number" ? f(est, 2) : "–"}</div></div>
       </div>
       <div id="lab-stepper" class="stepper"></div>
